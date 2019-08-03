@@ -62,7 +62,7 @@ print('-'*30)
 
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
-power = 3
+power = 4
 conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(inputs_left)
 conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
 conv1_left = Dropout(.25)(conv1_left)
@@ -145,41 +145,65 @@ conc_lr_4 = concatenate([pool4_l, pool4_r], axis=3)
 conv5 = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conc_lr_4)
 conv5 = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conv5)
 
-#up6 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(conv5), conc_lr_4], axis=3)
-up6 = concatenate([conv5, conc_lr_4], axis=3)
-#up6 = BatchNormalization()(up6)
-conv6 = Conv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(up6)
-#conv6 = Conv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(conv6)
-conv6 = BatchNormalization()(conv6)
 
-up7 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(conv6), conc_lr_3], axis=3)
-#up7 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(conv6), conc_lr_3], axis=3)
-#up7 = BatchNormalization()(up7)
-conv7 = Conv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(up7)
-#conv7 = Conv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(conv7)
-conv7 = BatchNormalization()(conv7)
+conv5_l = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(pool4_l)
+#conv5_l = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conv5_l)
+pool5_l = MaxPooling2D(pool_size=(2, 2))(conv5_l)
+pool5_l = BatchNormalization()(pool5_l)
+conv5_r = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(pool4_r)
+#conv5_r = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conv5_r)
+pool5_r = MaxPooling2D(pool_size=(2, 2))(conv5_r)
+pool5_r = BatchNormalization()(pool5_r)
 
-up8 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(conv7), conc_lr_2], axis=3)
-#up8 = BatchNormalization()(up8)
-conv8 = Conv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up8)
-#conv8 = Conv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(conv8)
-#conv8 = BatchNormalization()(conv8)
+conc_lr_5 = concatenate([pool5_l, pool5_r], axis=3)
+
+conv6 = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(conc_lr_5)
+conv6 = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(conv6)
+
+conv6_l = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(pool5_l)
+#conv6_l = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conv6_l)
+pool6_l = MaxPooling2D(pool_size=(2, 2))(conv6_l)
+pool6_l = BatchNormalization()(pool6_l)
+conv6_r = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(pool5_r)
+#conv6_r = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(conv6_r)
+pool6_r = MaxPooling2D(pool_size=(2, 2))(conv6_r)
+pool6_r = BatchNormalization()(pool6_r)
+
+conc_lr_6 = concatenate([pool6_l, pool6_r], axis=-1)
 
 
-up9 = concatenate([Conv2DTranspose(2**(power+1), (2, 2), strides=(2, 2), padding='same')(conv8), conc_lr_1], axis=3)
-#up9 = concatenate([conv8, conc_lr_1], axis=3)
-#up9 = BatchNormalization()(up9)
-conv9 = Conv2D(2**(power+1), (3, 3), activation='relu', padding='same')(up9)
-#pool5 = MaxPooling2D(pool_size=(2, 2))(conv9)
-#pool5 = BatchNormalization()(pool5)
-#conv9 = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv9)
-conv10 = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv9)
+conv_fin = Conv2D(2**(power + 6), (3, 3), activation='relu', padding='same')(conc_lr_6)
+conv_fin = Conv2D(2**(power + 6), (3, 3), activation='relu', padding='same')(conv_fin)
+pool_fin = MaxPooling2D(pool_size=(7, 7))(conv_fin)
+pool_fin = BatchNormalization()(pool_fin)
 
-conv11 = Conv2D(2**(power-1), (3, 3), activation='relu', padding='same')(conv10)
+#### _________Upscale part of glasshour____________
 
-conv12 = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(conv11)
+up4 = concatenate([Conv2DTranspose(2**(power + 6), (2, 2), strides=(7, 7), padding='same')(pool_fin), conc_lr_6], axis=3)
+up4 = Conv2D(2**(power + 6), (3, 3), activation='relu', padding='same')(up4)
 
-model = Model(inputs=[inputs_left, inputs_right], outputs=[conv12])
+up5 = concatenate([Conv2DTranspose(2**(power + 5), (2, 2), strides=(2, 2), padding='same')(up4), conc_lr_5], axis=3)
+up5 = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(up5)
+
+up6 = concatenate([Conv2DTranspose(2**(power + 4), (2, 2), strides=(2, 2), padding='same')(up5), conc_lr_4], axis=3)
+up6 = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(up6)
+
+up7 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(up6), conc_lr_3], axis=3)
+up7 = Conv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(up7)
+
+up8 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(up7), conc_lr_2], axis=3)
+up8 = Conv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(up8)
+
+up9 = concatenate([Conv2DTranspose(2**(power + 1), (2, 2), strides=(2, 2), padding='same')(up8), conc_lr_1], axis=3)
+up9 =  Conv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up9)
+
+conv11 = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
+
+conv12 = Conv2D(2**(power-1), (3, 3), activation='relu', padding='same')(conv11)
+
+conv13 = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(up9)
+
+model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
 model.compile(optimizer=Adam(lr=learning_rate), loss=[dice_coef_loss], metrics=[dice_coef])
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
@@ -217,7 +241,7 @@ imgs_mask /= 255.  # scale masks to [0, 1]
 print('-'*30)
 print('Creating and compiling model...')
 print('-'*30)
-model_checkpoint = ModelCheckpoint('weightsDispar', monitor='val_loss', save_best_only=True) #'val_loss'
+model_checkpoint = ModelCheckpoint('weightsDispar', monitor='val_loss', save_best_only=False) #'val_loss'
 
 print('-'*30)
 print('Fitting model...')
