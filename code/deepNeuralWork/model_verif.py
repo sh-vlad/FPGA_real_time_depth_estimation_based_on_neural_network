@@ -5,11 +5,11 @@ from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
 from keras.models import Model
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, BatchNormalization, Dropout
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, BatchNormalization, Dropout, SeparableConv2D
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
-
+from skimage.transform import resize
 
 
 from skimage.io import imsave, imread
@@ -69,8 +69,7 @@ conc_lr_6 = MaxPooling2D(pool_size=(2, 2))(conc_lr_5)
 conc_lr_6 = Conv2D(2**(power+5), (3, 3), activation='relu', padding='same')(conc_lr_6)
 
 
-conv_fin = Conv2D(2**(power + 6), (3, 3), activation='relu', padding='same')(conc_lr_6)
-conv_fin = Conv2D(2**(power + 6), (3, 3), activation='relu', padding='same')(conv_fin)
+
 pool_fin = MaxPooling2D(pool_size=(7, 7))(conc_lr_6)
 #pool_fin = BatchNormalization()(pool_fin)
 
@@ -94,11 +93,7 @@ up8 = Conv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up8)
 up9 = concatenate([Conv2DTranspose(2**(power), (2, 2), strides=(2, 2), padding='same')(up8), conc_lr_1], axis=3)
 up9 =  Conv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
 
-conv11 = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
-
-conv12 = Conv2D(2**(power-1), (3, 3), activation='relu', padding='same')(conv11)
-
-conv13 = Conv2D(1, (1, 1), activation='sigmoid', padding='same')(up9)
+conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
 
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
@@ -117,18 +112,16 @@ for layer in model.layers:
 
 # first read the test frame 
 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame549.jpg',
+img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame9743.jpg',
     as_gray=False)
-img_left = img_left[(np.shape(img_left)[0] - img_rows)//2 : ((np.shape(img_left)[0] - img_rows)//2)+img_rows,
-    (np.shape(img_left)[1] - img_cols)//2 : ((np.shape(img_left)[1] - img_cols)//2) + img_cols]
-img_left = np.reshape(img_left,[1,img_rows,img_cols,3]) 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame549.jpg',
+
+img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame9743.jpg',
     as_gray=False)
-img_right = img_right[(np.shape(img_right)[0] - img_rows)//2 : ((np.shape(img_right)[0] - img_rows)//2) + img_rows,
-    (np.shape(img_right)[1] - img_cols)//2 : ((np.shape(img_right)[1] - img_cols)//2) + img_cols]    
+
+img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))*255).astype(np.uint8),(img_rows,img_cols,3))
+img_right = resize(((img_right - np.amin(img_right))/(np.amax(img_right) - np.amin(img_right))*255).astype(np.uint8),(img_rows,img_cols,3))
 img_right = np.reshape(img_right,[1,img_rows,img_cols,3]) 
-
-
+img_left = np.reshape(img_left,[1,img_rows,img_cols,3]) 
 num_frame = 1 #321
 
 
