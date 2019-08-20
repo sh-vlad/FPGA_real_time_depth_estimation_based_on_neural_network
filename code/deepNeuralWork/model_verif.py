@@ -5,12 +5,12 @@ from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
 from keras.models import Model
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, BatchNormalization, Dropout, SeparableConv2D
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, BatchNormalization, Dropout, SeparableConv2D, UpSampling2D, Activation
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 from skimage.transform import resize
-
+from keras.layers import LeakyReLU, PReLU
 
 from skimage.io import imsave, imread
 import matplotlib.pyplot as plt
@@ -28,6 +28,8 @@ def preprocess(imgs):
 smooth = 1.
 img_rows = 224
 img_cols = 224
+do_coeff = 0.5
+upconv = False
 #img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/19_l.jpg',
  #   as_gray=False)
 #img_rows = np.shape(img_left)[0]    
@@ -36,62 +38,102 @@ img_cols = 224
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
 power = 5
-conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(inputs_left)
+conv1_left = Conv2D(2**(power), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
-#conv1_left = Dropout(.25)(conv1_left)
-#conv1_left = BatchNormalization()(conv1_left)
+conv1_left = BatchNormalization()(conv1_left)
+conv1_left = LeakyReLU()(conv1_left)
+#conv1_left = Dropout(do_coeff)(conv1_left)
+
 #pool1_left = MaxPooling2D(pool_size=(2, 2))(conv1_left)
 
 # input for the right frames
 inputs_right = Input((img_rows, img_cols, 3))
-conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(inputs_right)
+conv1_right = Conv2D(2**(power), (3, 3), padding='same')(inputs_right)
 #conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_right)
-#conv1_right = Dropout(.25)(conv1_right)
-#conv1_right = BatchNormalization()(conv1_right)
+conv1_right = BatchNormalization()(conv1_right)
+conv1_right = LeakyReLU()(conv1_right)
+#conv1_right = Dropout(do_coeff)(conv1_right)
 
 conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
 #conc_lr_1 = Dropout(.25)(conc_lr_1)
 #conc_lr_1 = BatchNormalization()(conc_lr_1)
 
 conc_lr_2 = MaxPooling2D(pool_size=(2, 2))(conc_lr_1)
-conc_lr_2 = Conv2D(2**(power+1), (3, 3), activation='relu', padding='same')(conc_lr_2)
+conc_lr_2 = Conv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
+conc_lr_2 = BatchNormalization()(conc_lr_2)
+conc_lr_2 = LeakyReLU()(conc_lr_2)
+#conc_lr_2 = Dropout(do_coeff)(conc_lr_2)
 
 conc_lr_3 = MaxPooling2D(pool_size=(2, 2))(conc_lr_2)
-conc_lr_3 = Conv2D(2**(power+2), (3, 3), activation='relu', padding='same')(conc_lr_3)
+conc_lr_3 = SeparableConv2D(2**(power+2), (3, 3), activation='relu', padding='same')(conc_lr_3)
+conc_lr_3 = BatchNormalization()(conc_lr_3)
+conc_lr_3 = LeakyReLU()(conc_lr_3)
+#conc_lr_3 = Dropout(do_coeff)(conc_lr_3)
 
 conc_lr_4 = MaxPooling2D(pool_size=(2, 2))(conc_lr_3)
-conc_lr_4 = Conv2D(2**(power+3), (3, 3), activation='relu', padding='same')(conc_lr_4)
+conc_lr_4 = SeparableConv2D(2**(power+3), (3, 3), activation='relu', padding='same')(conc_lr_4)
+conc_lr_4 = BatchNormalization()(conc_lr_4)
+conc_lr_4 = LeakyReLU()(conc_lr_4)
+#conc_lr_4 = Dropout(do_coeff)(conc_lr_4)
 
 conc_lr_5 = MaxPooling2D(pool_size=(2, 2))(conc_lr_4)
-conc_lr_5 = Conv2D(2**(power+4), (3, 3), activation='relu', padding='same')(conc_lr_5)
+conc_lr_5 = SeparableConv2D(2**(power+4), (3, 3), activation='relu', padding='same')(conc_lr_5)
+conc_lr_5 = BatchNormalization()(conc_lr_5)
+conc_lr_5 = LeakyReLU()(conc_lr_5)
+#conc_lr_5 = Dropout(do_coeff)(conc_lr_5)
 
 conc_lr_6 = MaxPooling2D(pool_size=(2, 2))(conc_lr_5)
-conc_lr_6 = Conv2D(2**(power+5), (3, 3), activation='relu', padding='same')(conc_lr_6)
-
+conc_lr_6 = SeparableConv2D(2**(power+5), (3, 3), activation='relu', padding='same')(conc_lr_6)
+conc_lr_6 = BatchNormalization()(conc_lr_6)
+conc_lr_6 = LeakyReLU()(conc_lr_6)
+#conc_lr_6 = Dropout(do_coeff)(conc_lr_6)
 
 
 pool_fin = MaxPooling2D(pool_size=(7, 7))(conc_lr_6)
 #pool_fin = BatchNormalization()(pool_fin)
 
 #### _________Upscale part of glasshour____________
+if upconv:
+    up4 = concatenate([UpSampling2D(2**(power + 5), (2, 2), strides=(7, 7), padding='same')(pool_fin), conc_lr_6], axis=3)
+else:
+    up4 = concatenate([UpSampling2D(size=(7, 7))(pool_fin), conc_lr_6])
 
-up4 = concatenate([Conv2DTranspose(2**(power + 5), (2, 2), strides=(7, 7), padding='same')(pool_fin), conc_lr_6], axis=3)
-up4 = Conv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(up4)
+up4 = SeparableConv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(up4)
 
-up5 = concatenate([Conv2DTranspose(2**(power + 4), (2, 2), strides=(2, 2), padding='same')(up4), conc_lr_5], axis=3)
-up5 = Conv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(up5)
+if upconv:
+    up5 = concatenate([Conv2DTranspose(2**(power + 4), (2, 2), strides=(2, 2), padding='same')(up4), conc_lr_5], axis=3)
+else:
+    up5 = concatenate([UpSampling2D(size=(2, 2))(up4), conc_lr_5])
 
-up6 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(up5), conc_lr_4], axis=3)
-up6 = Conv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(up6)
+up5 = SeparableConv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(up5)
 
-up7 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(up6), conc_lr_3], axis=3)
-up7 = Conv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(up7)
+if upconv:
+    up6 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(up5), conc_lr_4], axis=3)
+else:
+    up6 = concatenate([UpSampling2D(size=(2, 2))(up5), conc_lr_4])
 
-up8 = concatenate([Conv2DTranspose(2**(power + 1), (2, 2), strides=(2, 2), padding='same')(up7), conc_lr_2], axis=3)
-up8 = Conv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up8)
+up6 = SeparableConv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(up6)
 
-up9 = concatenate([Conv2DTranspose(2**(power), (2, 2), strides=(2, 2), padding='same')(up8), conc_lr_1], axis=3)
-up9 =  Conv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
+if upconv:
+    up7 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(up6), conc_lr_3], axis=3)
+else:
+    up7 = concatenate([UpSampling2D(size=(2, 2))(up6), conc_lr_3])
+
+up7 = SeparableConv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(up7)
+
+if upconv:
+    up8 = concatenate([Conv2DTranspose(2**(power + 1), (2, 2), strides=(2, 2), padding='same')(up7), conc_lr_2], axis=3)
+else:
+    up8 = concatenate([UpSampling2D(size=(2, 2))(up7), conc_lr_2])
+
+up8 = SeparableConv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up8)
+
+if upconv:
+    up9 = concatenate([Conv2DTranspose(2**(power), (2, 2), strides=(2, 2), padding='same')(up8), conc_lr_1], axis=3)
+else:
+    up9 = concatenate([UpSampling2D(size=(2, 2))(up8), conc_lr_1])
+
+up9 =  SeparableConv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
 
 conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
 
@@ -112,10 +154,10 @@ for layer in model.layers:
 
 # first read the test frame 
 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame9743.jpg',
+img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame19862.jpg',
     as_gray=False)
 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame9743.jpg',
+img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
     as_gray=False)
 
 img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))*255).astype(np.uint8),(img_rows,img_cols,3))
