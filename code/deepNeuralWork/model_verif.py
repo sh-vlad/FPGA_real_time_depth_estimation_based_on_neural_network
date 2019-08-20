@@ -37,8 +37,8 @@ upconv = False
 
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
-power = 4
-conv1_left = Conv2D(2**(power+1), (3, 3), padding='same')(inputs_left)
+power = 3
+conv1_left = Conv2D(2**(power+2), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
 conv1_left = BatchNormalization()(conv1_left)
 conv1_left = LeakyReLU()(conv1_left)
@@ -48,7 +48,7 @@ conv1_left = LeakyReLU()(conv1_left)
 
 # input for the right frames
 inputs_right = Input((img_rows, img_cols, 3))
-conv1_right = Conv2D(2**(power+1), (3, 3), padding='same')(inputs_right)
+conv1_right = Conv2D(2**(power+2), (3, 3), padding='same')(inputs_right)
 #conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_right)
 conv1_right = BatchNormalization()(conv1_right)
 conv1_right = LeakyReLU()(conv1_right)
