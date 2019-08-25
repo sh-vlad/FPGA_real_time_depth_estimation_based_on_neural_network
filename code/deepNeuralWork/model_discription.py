@@ -12,7 +12,9 @@ from keras.utils import plot_model
 from keras.optimizers import SGD
 from keras.layers import LeakyReLU, PReLU
 #from livelossplot import PlotLossesKeras
-
+import glob
+from skimage.io import imsave, imread, imshow
+from skimage import exposure
 smooth = 1e-4
 img_rows = 224
 img_cols = 224
@@ -23,6 +25,79 @@ total_epochs = 10000
 learning_rate = 0.002
 decay_rate = learning_rate/total_epochs*0
 upconv = False
+
+class DataGenerator(keras.utils.Sequence):
+    def __init__(self, mask_p, left_p, right_p, length = 66000, batch_size=16, is_noised = True, frac = 10, image_rows = 224, image_cols = 224):
+        self.length = length
+        self.batch_size = batch_size
+        self.paths_m = mask_p
+        self.paths_l = left_p
+        self.paths_r = right_p
+        self.on_epoch_end()
+        self.is_noised = is_noised
+        self.frac = frac
+        self.image_rows = image_rows
+        self.image_cols = image_cols
+    def __len__(self):
+        #return len(self.paths)
+        'Denotes the number of batches per epoch'
+        return int(np.floor(len(self.paths_m) / self.batch_size)/self.frac)
+
+    def __getitem__(self, index):
+        # Generate indexes of the batch
+        indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
+        
+        X_l = np.empty((self.batch_size, img_rows, img_cols, 3))
+        X_r = np.empty((self.batch_size, img_rows, img_cols, 3))
+        y = np.empty((self.batch_size,  img_rows, img_cols, 1))
+        for i in range(self.batch_size):
+            X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+            X_r[i,]  = resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+            rand_num_gamma = np.abs(np.random.randn()*2)
+            rand_num_log = np.abs(np.random.randn())
+            rn = np.abs(np.round(np.random.rand()*6))
+            if rn == 0 and self.is_noised:
+                X_l[i,] = self.add_noise(X_l[i,])
+                X_r[i,] = self.add_noise(X_r[i,])
+            if rn == 1 and self.is_noised:
+                X_l[i,] = exposure.adjust_gamma(X_l[i,],gamma = rand_num_gamma)
+                X_r[i,] = exposure.adjust_gamma(X_r[i,],gamma = rand_num_gamma)
+            if rn == 2 and self.is_noised:
+                X_l[i,] = exposure.adjust_log(X_l[i,], rand_num_log)
+                X_r[i,] = exposure.adjust_log(X_r[i,], rand_num_log)
+            if rn == 3 and self.is_noised:
+                p2, p98 = np.percentile(X_l[i,], (2, 98))
+                X_l[i,] = exposure.rescale_intensity(X_l[i,], in_range=(p2, p98))
+                X_r[i,] = exposure.rescale_intensity(X_r[i,], in_range=(p2, p98))
+            if rn == 4 and self.is_noised:
+                X_l[i,] = exposure.exposure.equalize_hist(X_l[i,])
+                X_r[i,] = exposure.exposure.equalize_hist(X_r[i,])
+            if rn == 5 and self.is_noised:
+                X_l[i,] = exposure.equalize_adapthist(X_l[i,], clip_limit=0.03)
+                X_r[i,] = exposure.equalize_adapthist(X_r[i,], clip_limit=0.03)
+            y[i,] = resize(imread(self.paths_m[indexes[i]], as_grey=True),(self.image_rows,self.image_cols, 1))
+
+        #feature = self.feature_extractor(self.paths[index])[np.newaxis, ..., np.newaxis]
+        X_l = (X_l - np.amin(X_l))/(np.amax(X_l) - np.amin(X_l))
+        X_r = (X_r - np.amin(X_r))/(np.amax(X_r) - np.amin(X_r))
+        y = (y - np.amin(y))/(np.amax(y) - np.amin(y))
+        #return feature, keras.utils.to_categorical([self.labels[index]], num_classes=2)
+        return [X_l, X_r], y
+
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(len(self.paths_m))
+        np.random.shuffle(self.indexes)
+
+
+    def add_noise(self, data):
+        mag_data = np.amax(data) - np.amin(data)
+        noise_level = 0.2
+        noise = np.random.randn(self.image_rows,self.image_cols, 3)
+        data_noise = data + noise_level * mag_data * noise
+        return data_noise
+
+
 
 
 #--------------------------------------
@@ -193,31 +268,31 @@ model.compile(optimizer=opt, loss='mean_absolute_error', metrics=[dice_coef]) #A
 plot_model(model, to_file='model.png', show_shapes=True)
 model.summary()
 model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
-
+model.save('my_model.h5')
 # left frames load and preprocess
-imgs_train_l = np.load('imgs_train_l.npy')
-imgs_train_l = preprocess(imgs_train_l)
-imgs_train_l = imgs_train_l.astype('float32')
-mean = np.mean(imgs_train_l)  # mean for data centering
-std = np.std(imgs_train_l)  # std for data normalization
-imgs_train_l -= mean
-imgs_train_l /= std
+#imgs_train_l = np.load('imgs_train_l.npy')
+#imgs_train_l = preprocess(imgs_train_l)
+#imgs_train_l = imgs_train_l.astype('float32')
+#mean = np.mean(imgs_train_l)  # mean for data centering
+#std = np.std(imgs_train_l)  # std for data normalization
+#imgs_train_l -= mean
+#imgs_train_l /= std
 # right frames load and preprocess
-imgs_train_r = np.load('imgs_train_r.npy')
-imgs_train_r = preprocess(imgs_train_r)
-imgs_train_r = imgs_train_r.astype('float32')
-mean = np.mean(imgs_train_r)  # mean for data centering
-std = np.std(imgs_train_r)  # std for data normalization
-imgs_train_r -= mean
-imgs_train_r /= std
+#imgs_train_r = np.load('imgs_train_r.npy')
+#imgs_train_r = preprocess(imgs_train_r)
+#imgs_train_r = imgs_train_r.astype('float32')
+#mean = np.mean(imgs_train_r)  # mean for data centering
+#std = np.std(imgs_train_r)  # std for data normalization
+#imgs_train_r -= mean
+#imgs_train_r /= std
 
-imgs_mask= np.load('imgs_test.npy')
+#imgs_mask= np.load('imgs_test.npy')
 
 #imgs_mask = preprocess(imgs_mask)
-imgs_mask = imgs_mask[..., np.newaxis]
+#imgs_mask = imgs_mask[..., np.newaxis]
 
-imgs_mask = imgs_mask.astype('float32')
-imgs_mask /= np.max(imgs_mask)  # scale masks to [0, 1]
+#imgs_mask = imgs_mask.astype('float32')
+#imgs_mask /= np.max(imgs_mask)  # scale masks to [0, 1]
 #imgs_mask = np.reshape(imgs_mask,(np.shape(imgs_mask)[0],np.shape(imgs_mask)[1],np.shape(imgs_mask)[2]))
 
 
@@ -230,25 +305,44 @@ print('-'*30)
 print('Fitting model...')
 print('-'*30)
 
-datagen = keras.preprocessing.image.ImageDataGenerator(
-    featurewise_center=True,
-    brightness_range=(0.3, 0.7),
-    featurewise_std_normalization=True,
-    rotation_range=5,
-    width_shift_range=0.05,
-    height_shift_range=0.05,
-    horizontal_flip=False,
-    validation_split=0.2)
+##datagen = keras.preprocessing.image.ImageDataGenerator(
+#    featurewise_center=True,
+#    brightness_range=(0.3, 0.7),
+#    featurewise_std_normalization=True,
+#    rotation_range=5,
+#    width_shift_range=0.05,
+#    height_shift_range=0.05,
+#    horizontal_flip=False,
+#    validation_split=0.2)
 # compute quantities required for featurewise normalization
 # (std, mean, and principal components if ZCA whitening is applied)
-datagen.fit(imgs_train_l)
+#datagen.fit(imgs_train_l)
 
-result = model.predict([np.reshape(imgs_train_l[1,:,:,:],[1,224,224,3]), np.reshape(imgs_train_r[1,:,:,:],[1,224,224,3])])
+#result = model.predict([np.reshape(imgs_train_l[1,:,:,:],[1,224,224,3]), np.reshape(imgs_train_r[1,:,:,:],[1,224,224,3])])
 
 #model.fit_generator(datagen.flow([imgs_train_l,imgs_train_r], imgs_mask, batch_size=4), epochs=total_epochs, verbose=1, shuffle=True,
 #            callbacks=[model_checkpoint],steps_per_epoch=len(imgs_train_l)//4)
+#mask_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/impr_result/*.jpg', recursive=True))
+#left_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/original_l/*.jpg', recursive=True))
+#right_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/original_r/*.jpg', recursive=True))
+mask_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/depth_map/*.jpg', recursive=True))
+left_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/left/*.jpg', recursive=True))
+right_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/right/*.jpg', recursive=True))
 
-model.fit([imgs_train_l,imgs_train_r], imgs_mask, batch_size=8, epochs=total_epochs, verbose=1, shuffle=True,
-            validation_split=0.2,
-            callbacks=[model_checkpoint])
+mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/depth_map/*.jpg', recursive=True))
+left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/left/*.jpg', recursive=True))
+right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/right/*.jpg', recursive=True))
+
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
+validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
+
+model.fit_generator(generator=training_generator,
+                validation_data=validation_generator,
+                use_multiprocessing=False, epochs=total_epochs,
+                workers=1, verbose=1,
+                callbacks=[model_checkpoint])
+
+#model.fit([imgs_train_l,imgs_train_r], imgs_mask, batch_size=8, epochs=total_epochs, verbose=1, shuffle=True,
+#            validation_split=0.2,
+#            callbacks=[model_checkpoint])
 model.save_weights('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/weightsDispar')

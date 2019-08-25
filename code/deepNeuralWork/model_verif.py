@@ -154,10 +154,10 @@ for layer in model.layers:
 
 # first read the test frame 
 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame19862.jpg',
+img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame9743.jpg',
     as_gray=False)
 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
+img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame9743.jpg',
     as_gray=False)
 
 img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))*255).astype(np.uint8),(img_rows,img_cols,3))
@@ -173,39 +173,39 @@ print('-'*30)
 pred_dir = 'C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/result'
 
 # left frames load and preprocess
-imgs_train_l = np.load('imgs_train_l.npy')
-imgs_train_l = preprocess(imgs_train_l)
-imgs_train_l = imgs_train_l.astype('float32')
-mean = np.mean(imgs_train_l)  # mean for data centering
-std = np.std(imgs_train_l)  # std for data normalization
-imgs_train_l -= mean
-imgs_train_l /= std
+#imgs_train_l = np.load('imgs_train_l.npy')
+#imgs_train_l = preprocess(imgs_train_l)
+#imgs_train_l = imgs_train_l.astype('float32')
+#mean = np.mean(imgs_train_l)  # mean for data centering
+#std = np.std(imgs_train_l)  # std for data normalization
+#imgs_train_l -= mean
+#imgs_train_l /= std
 
 
 #im_r = preprocess(img_right)
 im_r = img_right
-im_r = im_r.astype('float32')
-mean = np.mean(im_r)  # mean for data centering
-std = np.std(im_r)  # std for data normalization
-im_r -= mean
-im_r /= std
+#im_r = im_r.astype('float32')
+#mean = np.mean(im_r)  # mean for data centering
+#std = np.std(im_r)  # std for data normalization
+#im_r -= mean
+#im_r /= std
 #im_l = preprocess(img_left)
 im_l = img_left
-im_l = im_l.astype('float32')
-mean = np.mean(im_l)  # mean for data centering
-std = np.std(im_l)  # std for data normalization
-im_l -= mean
-im_l /= std
+#im_l = im_l.astype('float32')
+#mean = np.mean(im_l)  # mean for data centering
+#std = np.std(im_l)  # std for data normalization
+#im_l -= mean
+#im_l /= std
 
 
 # right frames load and preprocess
-imgs_train_r = np.load('imgs_train_r.npy')
-imgs_train_r = preprocess(imgs_train_r)
-imgs_train_r = imgs_train_r.astype('float32')
-mean = np.mean(imgs_train_r)  # mean for data centering
-std = np.std(imgs_train_r)  # std for data normalization
-imgs_train_r -= mean
-imgs_train_r /= std
+#imgs_train_r = np.load('imgs_train_r.npy')
+#imgs_train_r = preprocess(imgs_train_r)
+#imgs_train_r = imgs_train_r.astype('float32')
+#mean = np.mean(imgs_train_r)  # mean for data centering
+##std = np.std(imgs_train_r)  # std for data normalization
+#imgs_train_r -= mean
+#imgs_train_r /= std
 
 imgs_mask= np.load('imgs_test.npy')
 
@@ -224,7 +224,7 @@ imgs_mask_test = model.predict([im_l, im_r], verbose=1)
 image = ((imgs_mask_test[0, :, :, 0] -np.amin(imgs_mask_test[0, :, :, 0]))/
     (np.amax(imgs_mask_test[0, :, :, 0]) - np.amin(imgs_mask_test[0, :, :, 0]))* 255.).astype(np.uint8)
 image_id = 4
-imsave(os.path.join(pred_dir, str(image_id) + '_pred.png'), image)
+#imsave(os.path.join(pred_dir, str(image_id) + '_pred.png'), image)
 plt.figure()
 plt.subplot(131)
 #plt.imshow(np.reshape(imgs_train_l[num_frame,:,:,:],[img_rows,img_cols,3]))

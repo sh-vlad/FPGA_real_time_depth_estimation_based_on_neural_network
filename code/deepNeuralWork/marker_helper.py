@@ -23,7 +23,7 @@ right_frame_path = os.path.join(data_path, 'original_r/')
 mask_images = os.listdir(mask_data_path)
 left_frame_images = os.listdir(left_frame_path)
 right_frame_images = os.listdir(right_frame_path)
-list_IDs_temp = [mask_images[k] for k in list(mask_images)]
+#list_IDs_temp = [mask_images[k] for k in list(mask_images)]
 mask_images.sort()
 left_frame_images.sort()
 right_frame_images.sort()
@@ -37,7 +37,7 @@ imgs_l = np.ndarray((total_left, image_rows, image_cols,3), dtype=np.uint8)
 
 keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar'))
 
-i = 5176
+i = 5744
 print('-'*30)
 print('Opening files...')
 
