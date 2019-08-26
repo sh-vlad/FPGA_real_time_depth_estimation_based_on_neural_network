@@ -3,7 +3,7 @@ from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
 import keras 
-from keras.models import Model
+from keras.models import Model, model_from_json
 from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose, BatchNormalization, Dropout, SeparableConv2D, UpSampling2D, Activation
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
@@ -15,6 +15,7 @@ from keras.layers import LeakyReLU, PReLU
 import glob
 from skimage.io import imsave, imread, imshow
 from skimage import exposure
+import tensorflow as tf
 smooth = 1e-4
 img_rows = 224
 img_cols = 224
@@ -73,8 +74,8 @@ class DataGenerator(keras.utils.Sequence):
                 X_l[i,] = exposure.exposure.equalize_hist(X_l[i,])
                 X_r[i,] = exposure.exposure.equalize_hist(X_r[i,])
             if rn == 5 and self.is_noised:
-                X_l[i,] = exposure.equalize_adapthist(X_l[i,], clip_limit=0.03)
-                X_r[i,] = exposure.equalize_adapthist(X_r[i,], clip_limit=0.03)
+                X_l[i,] = exposure.equalize_adapthist(X_l[i,], clip_limit=rand_num_log) #clip_limit=0.03
+                X_r[i,] = exposure.equalize_adapthist(X_r[i,], clip_limit=rand_num_log)
             y[i,] = resize(imread(self.paths_m[indexes[i]], as_grey=True),(self.image_rows,self.image_cols, 1))
 
         #feature = self.feature_extractor(self.paths[index])[np.newaxis, ..., np.newaxis]
@@ -263,12 +264,19 @@ conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
 opt = SGD(lr = 0.05, momentum=0.02, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
-model.compile(optimizer=opt, loss='mean_absolute_error', metrics=[dice_coef]) #Adam(lr=learning_rate)
+model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate)
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
 model.summary()
 model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
 model.save('my_model.h5')
+#saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./saved_models")
+
+# serialize model to JSON
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+    json_file.write(model_json)
+
 # left frames load and preprocess
 #imgs_train_l = np.load('imgs_train_l.npy')
 #imgs_train_l = preprocess(imgs_train_l)
