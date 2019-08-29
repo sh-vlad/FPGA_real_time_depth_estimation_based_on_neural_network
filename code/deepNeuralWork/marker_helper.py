@@ -37,7 +37,7 @@ imgs_l = np.ndarray((total_left, image_rows, image_cols,3), dtype=np.uint8)
 
 keyboard.add_hotkey('page up, page down', lambda: keyboard.write('foobar'))
 
-i = 5744
+i = 5990
 print('-'*30)
 print('Opening files...')
 

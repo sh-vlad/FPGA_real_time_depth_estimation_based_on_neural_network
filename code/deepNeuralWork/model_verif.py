@@ -59,8 +59,8 @@ img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/tw
 img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
     as_gray=False)
 
-img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))*255).astype(np.uint8),(img_rows,img_cols,3))
-img_right = resize(((img_right - np.amin(img_right))/(np.amax(img_right) - np.amin(img_right))*255).astype(np.uint8),(img_rows,img_cols,3))
+img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))),(img_rows,img_cols,3))
+img_right = resize(((img_right - np.amin(img_right))/(np.amax(img_right) - np.amin(img_right))),(img_rows,img_cols,3))
 img_right = np.reshape(img_right,[1,img_rows,img_cols,3]) 
 img_left = np.reshape(img_left,[1,img_rows,img_cols,3]) 
 num_frame = 1 #321
@@ -69,12 +69,7 @@ num_frame = 1 #321
 print('-'*30)
 print('Predicting masks on test data...')
 print('-'*30)
-pred_dir = 'C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/result'
-imgs_mask= np.load('imgs_test.npy')
-imgs_mask = imgs_mask[..., np.newaxis]
 
-imgs_mask = imgs_mask.astype('float32')
-imgs_mask /= 255.  # scale masks to [0, 1]
 
 imgs_mask_test = model.predict([img_left, img_right], verbose=1)
 

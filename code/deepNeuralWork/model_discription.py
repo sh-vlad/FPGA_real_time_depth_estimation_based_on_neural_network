@@ -39,6 +39,10 @@ class DataGenerator(keras.utils.Sequence):
         self.frac = frac
         self.image_rows = image_rows
         self.image_cols = image_cols
+        self.left_m = np.load('train_l_mean.npy')
+        self.left_std = np.load('train_l_std.npy')
+        self.right_m = np.load('train_r_mean.npy')
+        self.right_std = np.load('train_r_std.npy')
     def __len__(self):
         #return len(self.paths)
         'Denotes the number of batches per epoch'
@@ -52,8 +56,8 @@ class DataGenerator(keras.utils.Sequence):
         X_r = np.empty((self.batch_size, img_rows, img_cols, 3))
         y = np.empty((self.batch_size,  img_rows, img_cols, 1))
         for i in range(self.batch_size):
-            X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
-            X_r[i,]  = resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+            X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))*255
+            X_r[i,]  = resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))*255
             rand_num_gamma = np.abs(np.random.randn()*2)
             rand_num_log = np.abs(np.random.randn())
             rn = np.abs(np.round(np.random.rand()*6))
@@ -74,14 +78,17 @@ class DataGenerator(keras.utils.Sequence):
                 X_l[i,] = exposure.exposure.equalize_hist(X_l[i,])
                 X_r[i,] = exposure.exposure.equalize_hist(X_r[i,])
             if rn == 5 and self.is_noised:
-                X_l[i,] = exposure.equalize_adapthist(X_l[i,], clip_limit=rand_num_log) #clip_limit=0.03
-                X_r[i,] = exposure.equalize_adapthist(X_r[i,], clip_limit=rand_num_log)
+                X_l[i,] = exposure.equalize_adapthist(X_l[i,], clip_limit=0.03) #clip_limit=0.03
+                X_r[i,] = exposure.equalize_adapthist(X_r[i,], clip_limit=0.03)
             y[i,] = resize(imread(self.paths_m[indexes[i]], as_grey=True),(self.image_rows,self.image_cols, 1))
 
         #feature = self.feature_extractor(self.paths[index])[np.newaxis, ..., np.newaxis]
-        X_l = (X_l - np.amin(X_l))/(np.amax(X_l) - np.amin(X_l))
-        X_r = (X_r - np.amin(X_r))/(np.amax(X_r) - np.amin(X_r))
-        y = (y - np.amin(y))/(np.amax(y) - np.amin(y))
+        X_l = (X_l - self.left_m)/self.left_std
+        X_r = (X_r - self.right_m)/self.right_std
+        #X_l = (X_l - np.amin(X_l))/(np.amax(X_l) - np.amin(X_l))
+        #X_r = (X_r - np.amin(X_r))/(np.amax(X_r) - np.amin(X_r))
+
+        #y = y/255
         #return feature, keras.utils.to_categorical([self.labels[index]], num_classes=2)
         return [X_l, X_r], y
 
@@ -97,6 +104,8 @@ class DataGenerator(keras.utils.Sequence):
         noise = np.random.randn(self.image_rows,self.image_cols, 3)
         data_noise = data + noise_level * mag_data * noise
         return data_noise
+
+
 
 
 
@@ -264,11 +273,11 @@ conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
 opt = SGD(lr = 0.05, momentum=0.02, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
-model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate)
+model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
 model.summary()
-model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
+#model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
 model.save('my_model.h5')
 #saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./saved_models")
 
@@ -333,15 +342,17 @@ print('-'*30)
 #mask_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/impr_result/*.jpg', recursive=True))
 #left_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/original_l/*.jpg', recursive=True))
 #right_i_train = sorted(glob.glob('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/i_need_an_order/data24k/original_r/*.jpg', recursive=True))
-mask_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/depth_map/*.jpg', recursive=True))
-left_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/left/*.jpg', recursive=True))
-right_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_3/right/*.jpg', recursive=True))
 
-mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/depth_map/*.jpg', recursive=True))
-left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/left/*.jpg', recursive=True))
-right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/pic_droper_2/right/*.jpg', recursive=True))
 
-training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
+mask_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/depth_map/*.jpg', recursive=True))
+left_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/left/*.jpg', recursive=True))
+right_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/right/*.jpg', recursive=True))
+
+mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/depth_map/*.jpg', recursive=True))
+left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/left/*.jpg', recursive=True))
+right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/right/*.jpg', recursive=True))
+
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = False, frac = 1)
 validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
 
 model.fit_generator(generator=training_generator,
