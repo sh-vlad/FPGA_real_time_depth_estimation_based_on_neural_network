@@ -56,8 +56,9 @@ class DataGenerator(keras.utils.Sequence):
         X_r = np.empty((self.batch_size, img_rows, img_cols, 3))
         y = np.empty((self.batch_size,  img_rows, img_cols, 1))
         for i in range(self.batch_size):
-            X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))*255
-            X_r[i,]  = resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))*255
+            X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+            X_r[i,]  =resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+
             rand_num_gamma = np.abs(np.random.randn()*2)
             rand_num_log = np.abs(np.random.randn())
             rn = np.abs(np.round(np.random.rand()*6))
@@ -83,8 +84,8 @@ class DataGenerator(keras.utils.Sequence):
             y[i,] = resize(imread(self.paths_m[indexes[i]], as_grey=True),(self.image_rows,self.image_cols, 1))
 
         #feature = self.feature_extractor(self.paths[index])[np.newaxis, ..., np.newaxis]
-        X_l = (X_l - self.left_m)/self.left_std
-        X_r = (X_r - self.right_m)/self.right_std
+        X_l = (X_l*255 - self.left_m)/self.left_std
+        X_r = (X_r*255 - self.right_m)/self.right_std
         #X_l = (X_l - np.amin(X_l))/(np.amax(X_l) - np.amin(X_l))
         #X_r = (X_r - np.amin(X_r))/(np.amax(X_r) - np.amin(X_r))
 
@@ -272,12 +273,12 @@ conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
 
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
-opt = SGD(lr = 0.05, momentum=0.02, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
-model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
+opt = SGD(lr = 0.01, momentum=0.9, decay = 1e-6, nesterov=True)#Adam(lr=0.005, decay= 0.0)
+model.compile(optimizer=opt, loss='mean_absolute_error', metrics=[dice_coef]) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
 model.summary()
-#model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
+model.load_weights('C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/weightsDispar', by_name=True)
 model.save('my_model.h5')
 #saved_model_path = tf.contrib.saved_model.save_keras_model(model, "./saved_models")
 
@@ -352,7 +353,7 @@ mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/depth_map/*.jpg',
 left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/left/*.jpg', recursive=True))
 right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/right/*.jpg', recursive=True))
 
-training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = False, frac = 1)
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
 validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
 
 model.fit_generator(generator=training_generator,
