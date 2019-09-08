@@ -10,7 +10,7 @@ from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 from keras.utils import plot_model
 from keras.optimizers import SGD
-from keras.layers import LeakyReLU, PReLU
+from keras.layers import LeakyReLU, PReLU, ReLU
 #from livelossplot import PlotLossesKeras
 import glob
 from skimage.io import imsave, imread, imshow
@@ -26,6 +26,8 @@ total_epochs = 10000
 learning_rate = 0.002
 decay_rate = learning_rate/total_epochs*0
 upconv = False
+bn = True
+l_rlu = False
 
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, mask_p, left_p, right_p, length = 66000, batch_size=16, is_noised = True, frac = 10, image_rows = 224, image_cols = 224):
@@ -172,20 +174,28 @@ print('-'*30)
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
 power = 3
-conv1_left = Conv2D(2**(power+2), (3, 3), padding='same')(inputs_left)
+conv1_left = SeparableConv2D(2**(power+2), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
-conv1_left = BatchNormalization()(conv1_left)
-conv1_left = LeakyReLU()(conv1_left)
+if bn:
+    conv1_left = BatchNormalization()(conv1_left)
+if l_rlu:    
+    conv1_left = LeakyReLU()(conv1_left)
+else:
+    conv1_left = ReLU()(conv1_left)
 #conv1_left = Dropout(do_coeff)(conv1_left)
 
 #pool1_left = MaxPooling2D(pool_size=(2, 2))(conv1_left)
 
 # input for the right frames
 inputs_right = Input((img_rows, img_cols, 3))
-conv1_right = Conv2D(2**(power+2), (3, 3), padding='same')(inputs_right)
+conv1_right = SeparableConv2D(2**(power+2), (3, 3), padding='same')(inputs_right)
 #conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_right)
-conv1_right = BatchNormalization()(conv1_right)
-conv1_right = LeakyReLU()(conv1_right)
+if bn:
+    conv1_right = BatchNormalization()(conv1_right)
+if l_rlu:    
+    conv1_right = LeakyReLU()(conv1_right)
+else:
+    conv1_right = ReLU()(conv1_right)
 #conv1_right = Dropout(do_coeff)(conv1_right)
 
 conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
@@ -193,33 +203,54 @@ conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
 #conc_lr_1 = BatchNormalization()(conc_lr_1)
 
 conc_lr_2 = MaxPooling2D(pool_size=(2, 2))(conc_lr_1)
-conc_lr_2 = Conv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
-conc_lr_2 = BatchNormalization()(conc_lr_2)
-conc_lr_2 = LeakyReLU()(conc_lr_2)
+conc_lr_2 = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
+if bn:
+    conc_lr_2 = BatchNormalization()(conc_lr_2)
+if l_rlu:    
+    conc_lr_2 = LeakyReLU()(conc_lr_2)
+else:
+    conc_lr_2 = ReLU()(conc_lr_2)
 #conc_lr_2 = Dropout(do_coeff)(conc_lr_2)
 
 conc_lr_3 = MaxPooling2D(pool_size=(2, 2))(conc_lr_2)
-conc_lr_3 = SeparableConv2D(2**(power+2), (3, 3), activation='relu', padding='same')(conc_lr_3)
-conc_lr_3 = BatchNormalization()(conc_lr_3)
-conc_lr_3 = LeakyReLU()(conc_lr_3)
+conc_lr_3 = SeparableConv2D(2**(power+2), (3, 3), padding='same')(conc_lr_3)
+if bn:
+    conc_lr_3 = BatchNormalization()(conc_lr_3)
+if l_rlu:    
+    conc_lr_3 = LeakyReLU()(conc_lr_3)
+else:
+    conc_lr_3 = ReLU()(conc_lr_3)
 #conc_lr_3 = Dropout(do_coeff)(conc_lr_3)
 
 conc_lr_4 = MaxPooling2D(pool_size=(2, 2))(conc_lr_3)
-conc_lr_4 = SeparableConv2D(2**(power+3), (3, 3), activation='relu', padding='same')(conc_lr_4)
-conc_lr_4 = BatchNormalization()(conc_lr_4)
-conc_lr_4 = LeakyReLU()(conc_lr_4)
+conc_lr_4 = SeparableConv2D(2**(power+3), (3, 3),  padding='same')(conc_lr_4)
+if bn:
+    conc_lr_4 = BatchNormalization()(conc_lr_4)
+if l_rlu:    
+    conc_lr_4 = LeakyReLU()(conc_lr_4)
+else:
+    conc_lr_4 = ReLU()(conc_lr_4)
 #conc_lr_4 = Dropout(do_coeff)(conc_lr_4)
 
 conc_lr_5 = MaxPooling2D(pool_size=(2, 2))(conc_lr_4)
-conc_lr_5 = SeparableConv2D(2**(power+4), (3, 3), activation='relu', padding='same')(conc_lr_5)
-conc_lr_5 = BatchNormalization()(conc_lr_5)
-conc_lr_5 = LeakyReLU()(conc_lr_5)
+conc_lr_5 = SeparableConv2D(2**(power+4), (3, 3), padding='same')(conc_lr_5)
+if bn:
+    conc_lr_5 = BatchNormalization()(conc_lr_5)
+if l_rlu:    
+    conc_lr_5 = LeakyReLU()(conc_lr_5)
+else:
+    conc_lr_5 = ReLU()(conc_lr_5)
 #conc_lr_5 = Dropout(do_coeff)(conc_lr_5)
 
 conc_lr_6 = MaxPooling2D(pool_size=(2, 2))(conc_lr_5)
-conc_lr_6 = SeparableConv2D(2**(power+5), (3, 3), activation='relu', padding='same')(conc_lr_6)
-conc_lr_6 = BatchNormalization()(conc_lr_6)
-conc_lr_6 = LeakyReLU()(conc_lr_6)
+conc_lr_6 = SeparableConv2D(2**(power+5), (3, 3), padding='same')(conc_lr_6)
+
+if bn:
+    conc_lr_6 = BatchNormalization()(conc_lr_6)
+if l_rlu:    
+    conc_lr_6 = LeakyReLU()(conc_lr_6)
+else:
+    conc_lr_6 = ReLU()(conc_lr_6)
 #conc_lr_6 = Dropout(do_coeff)(conc_lr_6)
 
 
@@ -227,54 +258,99 @@ pool_fin = MaxPooling2D(pool_size=(7, 7))(conc_lr_6)
 #pool_fin = BatchNormalization()(pool_fin)
 
 #### _________Upscale part of glasshour____________
+power = power-1
 if upconv:
     up4 = concatenate([UpSampling2D(2**(power + 5), (2, 2), strides=(7, 7), padding='same')(pool_fin), conc_lr_6], axis=3)
 else:
     up4 = concatenate([UpSampling2D(size=(7, 7))(pool_fin), conc_lr_6])
 
-up4 = SeparableConv2D(2**(power + 5), (3, 3), activation='relu', padding='same')(up4)
+up4 = SeparableConv2D(2**(power + 5), (3, 3), padding='same')(up4)
+if bn:
+    up4 = BatchNormalization()(up4)
+if l_rlu:    
+    up4 = LeakyReLU()(up4)
+else:
+    up4 = ReLU()(up4)
 
 if upconv:
     up5 = concatenate([Conv2DTranspose(2**(power + 4), (2, 2), strides=(2, 2), padding='same')(up4), conc_lr_5], axis=3)
 else:
     up5 = concatenate([UpSampling2D(size=(2, 2))(up4), conc_lr_5])
 
-up5 = SeparableConv2D(2**(power + 4), (3, 3), activation='relu', padding='same')(up5)
+up5 = SeparableConv2D(2**(power + 4), (3, 3), padding='same')(up5)
+if bn:
+    up5 = BatchNormalization()(up5)
+if l_rlu:    
+    up5 = LeakyReLU()(up5)
+else:
+    up5 = ReLU()(up5)
 
 if upconv:
     up6 = concatenate([Conv2DTranspose(2**(power + 3), (2, 2), strides=(2, 2), padding='same')(up5), conc_lr_4], axis=3)
 else:
     up6 = concatenate([UpSampling2D(size=(2, 2))(up5), conc_lr_4])
 
-up6 = SeparableConv2D(2**(power + 3), (3, 3), activation='relu', padding='same')(up6)
+up6 = SeparableConv2D(2**(power + 3), (3, 3), padding='same')(up6)
+if bn:
+    up6 = BatchNormalization()(up6)
+if l_rlu:    
+    up6 = LeakyReLU()(up6)
+else:
+    up6 = ReLU()(up6)
 
 if upconv:
     up7 = concatenate([Conv2DTranspose(2**(power + 2), (2, 2), strides=(2, 2), padding='same')(up6), conc_lr_3], axis=3)
 else:
     up7 = concatenate([UpSampling2D(size=(2, 2))(up6), conc_lr_3])
 
-up7 = SeparableConv2D(2**(power + 2), (3, 3), activation='relu', padding='same')(up7)
+up7 = SeparableConv2D(2**(power + 2), (3, 3),  padding='same')(up7)
+if bn:
+    up7 = BatchNormalization()(up7)
+if l_rlu:    
+    up7 = LeakyReLU()(up7)
+else:
+    up7 = ReLU()(up7)
 
 if upconv:
     up8 = concatenate([Conv2DTranspose(2**(power + 1), (2, 2), strides=(2, 2), padding='same')(up7), conc_lr_2], axis=3)
 else:
     up8 = concatenate([UpSampling2D(size=(2, 2))(up7), conc_lr_2])
 
-up8 = SeparableConv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(up8)
+up8 = SeparableConv2D(2**(power + 1), (3, 3), padding='same')(up8)
+if bn:
+    up8 = BatchNormalization()(up8)
+if l_rlu:    
+    up8 = LeakyReLU()(up8)
+else:
+    up8 = ReLU()(up8)
+
+conc_lr_1 = SeparableConv2D(2**(power + 1), (3, 3), activation='relu', padding='same')(conc_lr_1)
 
 if upconv:
     up9 = concatenate([Conv2DTranspose(2**(power), (2, 2), strides=(2, 2), padding='same')(up8), conc_lr_1], axis=3)
 else:
     up9 = concatenate([UpSampling2D(size=(2, 2))(up8), conc_lr_1])
 
-up9 =  SeparableConv2D(2**(power), (3, 3), activation='relu', padding='same')(up9)
+up9 =  SeparableConv2D(2**(power), (3, 3), padding='same')(up9)
+if bn:
+    up9 = BatchNormalization()(up9)
+if l_rlu:    
+    up9 = LeakyReLU()(up9)
+else:
+    up9 = ReLU()(up9)
 
-conv13 = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(up9)
+conv13 = SeparableConv2D(1, (3, 3), padding='same')(up9)
+if bn:
+    conv13 = BatchNormalization()(conv13)
+if l_rlu:    
+    conv13 = LeakyReLU()(conv13)
+else:
+    conv13 = ReLU()(conv13)
 
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
-opt = SGD(lr = 0.01, momentum=0.9, decay = 1e-6, nesterov=True)#Adam(lr=0.005, decay= 0.0)
-model.compile(optimizer=opt, loss='mean_absolute_error', metrics=[dice_coef]) #Adam(lr=learning_rate) dice_coef
+opt = SGD(lr = 0.02, momentum=0.5, decay = 0, nesterov=False)#Adam(lr=0.005, decay= 0.0)
+model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
 model.summary()
@@ -349,11 +425,11 @@ mask_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/depth_map/*.jpg'
 left_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/left/*.jpg', recursive=True))
 right_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/right/*.jpg', recursive=True))
 
-mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/depth_map/*.jpg', recursive=True))
-left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/left/*.jpg', recursive=True))
-right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/test/right/*.jpg', recursive=True))
+mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/depth_map/*.jpg', recursive=True))
+left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/left/*.jpg', recursive=True))
+right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/right/*.jpg', recursive=True))
 
-training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = False, frac = 1)
 validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
 
 model.fit_generator(generator=training_generator,

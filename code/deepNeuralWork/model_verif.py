@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import glob
 import os
 from skimage.transform import resize
 from skimage.io import imsave
@@ -14,6 +14,8 @@ from keras.layers import LeakyReLU, PReLU
 import tensorflow as tf
 from skimage.io import imsave, imread
 import matplotlib.pyplot as plt
+from keras.optimizers import SGD
+
 
 def dice_coef(y_true, y_pred):
     y_true_f = K.flatten(y_true)
@@ -53,10 +55,10 @@ for layer in model.layers:
     weights = layer.get_weights() # list of numpy arrays
 
 # first read the test frame 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame19862.jpg',
+img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame9743.jpg',
     as_gray=False)
 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
+img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame9743.jpg',
     as_gray=False)
 
 img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))),(img_rows,img_cols,3))*255
@@ -69,6 +71,26 @@ left_m = np.load('train_l_mean.npy')
 left_std = np.load('train_l_std.npy')
 right_m = np.load('train_r_mean.npy')
 right_std = np.load('train_r_std.npy')
+
+# Data for test
+
+mask_i_test = sorted(glob.glob('C:/Users/tomil/Downloads/test/depth_map/*.jpg', recursive=True))
+left_i_test = sorted(glob.glob('C:/Users/tomil/Downloads/test/left/*.jpg', recursive=True))
+right_i_test = sorted(glob.glob('C:/Users/tomil/Downloads/test/right/*.jpg', recursive=True))
+X_l = np.zeros((len(left_i_test),img_rows,img_cols,3))
+X_r = np.zeros((len(right_i_test),img_rows,img_cols,3))
+y = np.zeros((len(mask_i_test),img_rows,img_cols,1))
+for i in range(len(mask_i_test)):
+    X_l[i,]  = resize(imread(left_i_test[i], as_grey=False),(img_rows,img_cols,3))
+    X_r[i,]  = resize(imread(right_i_test[i], as_grey=False),(img_rows,img_cols,3))
+    y[i,] = resize(imread(mask_i_test[i], as_grey=True),(img_rows,img_cols, 1))
+X_l = (X_l*255 - left_m)/left_std
+X_r = (X_r*255 - right_m)/right_std
+
+opt = SGD(lr = 0.01, momentum=0.9, decay = 1e-6, nesterov=True)#Adam(lr=0.005, decay= 0.0)
+model.compile(optimizer=opt, loss='mean_absolute_error', metrics=[dice_coef]) #Adam(lr=learning_rate) dice_coef
+score=model.evaluate([X_l, X_r],y)
+print(score)
 
 img_right = (img_right-right_m)/right_std
 img_left = (img_left-left_m)/left_std
