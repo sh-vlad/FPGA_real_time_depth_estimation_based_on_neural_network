@@ -174,7 +174,7 @@ print('-'*30)
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
 power = 3
-conv1_left = SeparableConv2D(2**(power+2), (3, 3), padding='same')(inputs_left)
+conv1_left = SeparableConv2D(2**(power+1), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
 if bn:
     conv1_left = BatchNormalization()(conv1_left)
@@ -188,7 +188,7 @@ else:
 
 # input for the right frames
 inputs_right = Input((img_rows, img_cols, 3))
-conv1_right = SeparableConv2D(2**(power+2), (3, 3), padding='same')(inputs_right)
+conv1_right = SeparableConv2D(2**(power+1), (3, 3), padding='same')(inputs_right)
 #conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_right)
 if bn:
     conv1_right = BatchNormalization()(conv1_right)
@@ -203,7 +203,7 @@ conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
 #conc_lr_1 = BatchNormalization()(conc_lr_1)
 
 conc_lr_2 = MaxPooling2D(pool_size=(2, 2))(conc_lr_1)
-conc_lr_2 = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
+conc_lr_2 = SeparableConv2D(2**(power+2), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
 if bn:
     conc_lr_2 = BatchNormalization()(conc_lr_2)
 if l_rlu:    
@@ -349,7 +349,13 @@ else:
 
 model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 
-opt = SGD(lr = 0.02, momentum=0.5, decay = 0, nesterov=False)#Adam(lr=0.005, decay= 0.0)
+
+# Quantization aware training
+#sess = tf.keras.backend.get_session()
+#tf.contrib.quantize.create_training_graph(sess.graph)
+#sess.run(tf.global_variables_initializer())
+
+opt = SGD(lr = 0.01, momentum=0.9, decay = 0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
 model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
@@ -429,8 +435,21 @@ mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/depth_map
 left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/left/*.jpg', recursive=True))
 right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/right/*.jpg', recursive=True))
 
-training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = False, frac = 1)
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
 validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
+
+#dataset = tf.data.Dataset().batch(1).from_generator(training_generator,
+#                                           output_types= tf.float32, 
+#                                           output_shapes=(tf.TensorShape([[[None, img_rows, img_cols,3], [None, img_rows, img_cols,3]],[None, img_rows, img_cols,1]])))
+#iter = dataset.make_initializable_iterator()
+#el_tr = iter.get_next()
+
+#dataset = tf.data.Dataset().batch(1).from_generator(validation_generator,
+#                                           output_types= tf.float32, 
+#                                           output_shapes=(tf.TensorShape([[[None, img_rows, img_cols,3], [None, img_rows, img_cols,3]],[None, img_rows, img_cols,1]])))
+#iter = dataset.make_initializable_iterator()
+#el_val = iter.get_next()
+
 
 model.fit_generator(generator=training_generator,
                 validation_data=validation_generator,
