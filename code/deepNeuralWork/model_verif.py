@@ -55,10 +55,10 @@ for layer in model.layers:
     weights = layer.get_weights() # list of numpy arrays
 
 # first read the test frame 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame9743.jpg',
+img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame19862.jpg',
     as_gray=False)
 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame9743.jpg',
+img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
     as_gray=False)
 
 img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))),(img_rows,img_cols,3))*255

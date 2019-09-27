@@ -182,6 +182,15 @@ if l_rlu:
     conv1_left = LeakyReLU()(conv1_left)
 else:
     conv1_left = ReLU()(conv1_left)
+
+conv1_left = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conv1_left)
+if bn:
+    conv1_left = BatchNormalization()(conv1_left)
+if l_rlu:    
+    conv1_left = LeakyReLU()(conv1_left)
+else:
+    conv1_left = ReLU()(conv1_left)
+
 #conv1_left = Dropout(do_coeff)(conv1_left)
 
 #pool1_left = MaxPooling2D(pool_size=(2, 2))(conv1_left)
@@ -196,6 +205,15 @@ if l_rlu:
     conv1_right = LeakyReLU()(conv1_right)
 else:
     conv1_right = ReLU()(conv1_right)
+
+conv1_right = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conv1_right)
+#conv1_right = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_right)
+if bn:
+    conv1_right = BatchNormalization()(conv1_right)
+if l_rlu:    
+    conv1_right = LeakyReLU()(conv1_right)
+else:
+    conv1_right = ReLU()(conv1_right)
 #conv1_right = Dropout(do_coeff)(conv1_right)
 
 conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
@@ -203,7 +221,7 @@ conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
 #conc_lr_1 = BatchNormalization()(conc_lr_1)
 
 conc_lr_2 = MaxPooling2D(pool_size=(2, 2))(conc_lr_1)
-conc_lr_2 = SeparableConv2D(2**(power+2), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
+conc_lr_2 = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
 if bn:
     conc_lr_2 = BatchNormalization()(conc_lr_2)
 if l_rlu:    
@@ -355,7 +373,7 @@ model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 #tf.contrib.quantize.create_training_graph(sess.graph)
 #sess.run(tf.global_variables_initializer())
 
-opt = SGD(lr = 0.01, momentum=0.9, decay = 0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
+opt = SGD(lr = 0.01, momentum=0.9, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
 model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
