@@ -28,38 +28,25 @@ module FPGA_rtime_depth_estimation_top
     output             fan_ctrl     	   
 	
 );
-avl_ifc  #( 20, 32, 4)     avl_rgb_data_in(); 
-avl_ifc  #( 20, 32, 4)     avl_ctrl_registers(); 
-avl_ifc  #( 17, 32, 4)     avl_mem_result();
+avl_stream_ifc  #( 8        )     data_i(); 
+avl_stream_ifc  #( 8        )     data_o(); 
+avl_ifc         #( 8        )     avl_ctrl_registers(); 
+avl_ifc         #( 17, 32, 4)     avl_mem_result();
 qsys_ifc qsys_ifc_inst
 (
-	.clock_50_b3b       (CLOCK_50_B3B),
-	.clk_dsp            (),
-	.clk_ddr3            (CLOCK_50_B4A),
-	.clk_result         (clk_user_out), // <-
-	.global_reset_n     (reset_n           ), //->
-	.clk_user_out       (clk_user_out      ), // ->
-	.avl_rgb_data_in    (avl_rgb_data_in   ),   // ->
-	.avl_ctrl_registers (avl_ctrl_registers),   
-	.avl_mem_result     (avl_mem_result    ),   
-	.pcie               (pcie_pin.pcie_port          ),
-	.ddr3_mem           (ddr3_pin.ddr3_port          )
+	.clock_50_b3b               (CLOCK_50_B3B       ),
+	.clk_dsp                    (                   ),
+	.clk_ddr3                   (CLOCK_50_B4A       ),
+	.clk_result                 (clk_user_out       ), // <-
+	.global_reset_n             (reset_n            ), //->
+	.clk_user_out               (clk_user_out       ), // ->
+	.avl_stream_rgb_data_in     (data_i             ), // ->
+	.avl_ctrl_registers         (avl_ctrl_registers ), // ->  
+	.avl_stream_rgb_data_result (data_o             ), //<-  
+	.pcie                       (pcie_pin.pcie_port ),
+	.ddr3_mem                   (ddr3_pin.ddr3_port )
 ); 
-/*
-qsys_ifc qsys_ifc_inst
-(
-	.clock_50_b3b       (CLOCK_50_B4A),
-	.clk_dsp            (),
-	.clk_result         (),
-	.global_reset_n     (reset_n           ), //->
-	.clk_user_out       (clk_user_out      ), // ->
-	.avl_rgb_data_in    (avl_rgb_data_in   ),   // ->
-	.avl_ctrl_registers (avl_ctrl_registers),   
-	.avl_mem_result     (avl_mem_result    ),   
-	.pcie               (pcie_pin          ),
-	.ddr3_mem           (ddr3_pin          )
-);
-*/
+
 
 
 assign 	fan_ctrl = 1'b1;
