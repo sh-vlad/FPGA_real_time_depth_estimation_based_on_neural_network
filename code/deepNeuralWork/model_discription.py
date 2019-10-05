@@ -173,7 +173,7 @@ print('-'*30)
 
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
-power = 3
+power = 5
 conv1_left = SeparableConv2D(2**(power+1), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
 if bn:

@@ -55,10 +55,14 @@ for layer in model.layers:
     weights = layer.get_weights() # list of numpy arrays
 
 # first read the test frame 
-img_left = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/left_frame19862.jpg',
+num_frame = 16119
+img_left = imread('C:/Users/tomil/Downloads/test/left/'+str(num_frame)+'.jpg',
     as_gray=False)
 
-img_right = imread('C:/Users/tomil/Documents/Python_progs/NN/Complex probllems/twoCameraProcessing/only_for_test/left-right/right_frame19862.jpg',
+img_right = imread('C:/Users/tomil/Downloads/test/right/'+str(num_frame)+'.jpg',
+    as_gray=False)
+
+img_dm = imread('C:/Users/tomil/Downloads/test/depth_map/'+str(num_frame)+'.jpg',
     as_gray=False)
 
 img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(img_left))),(img_rows,img_cols,3))*255
@@ -107,18 +111,19 @@ image = ((imgs_mask_test[0, :, :, 0] -np.amin(imgs_mask_test[0, :, :, 0]))/
 image_id = 4
 
 plt.figure()
-plt.subplot(131)
+plt.subplot(141)
 #plt.imshow(np.reshape(imgs_train_l[num_frame,:,:,:],[img_rows,img_cols,3]))
-plt.imshow(img_right[0])
+plt.imshow((img_right[0]-np.min(img_right[0]))/((np.max(img_right[0])-np.min(img_right[0]))))
 plt.title('Left Frame')
-plt.subplot(132)
+plt.subplot(142)
 #plt.imshow(np.reshape(imgs_train_r[num_frame,:,:,:],[img_rows,img_cols,3]))
-plt.imshow(img_left[0])
+plt.imshow((img_left[0]-np.min(img_left[0]))/((np.max(img_left[0])-np.min(img_left[0]))))
 plt.title('Right Frame')
-#plt.subplot(143)
-#plt.imshow(np.reshape(imgs_mask[num_frame,:,:,:],[img_rows,img_cols]))
-#plt.title('Depth Map')
-plt.subplot(133)
+plt.subplot(143)
 plt.imshow(np.reshape(image,[img_rows,img_cols]))
-plt.title('Output of NN')
+plt.title('Output of classical algorithm')
+plt.subplot(144)
+plt.gray()
+plt.imshow(img_dm)
+#plt.title('Depth Map')
 plt.show()

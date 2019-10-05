@@ -15,8 +15,9 @@ tf.enable_eager_execution()
 img_rows = 224
 img_cols = 224
 
-full_quant = True
+full_quant = False
 isrand = False
+not_rand_dataset = False
 
 mask_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/depth_map/*.jpg', recursive=True))
 left_i_train = sorted(glob.glob('C:/Users/tomil/Downloads/train/left/*.jpg', recursive=True))
@@ -26,32 +27,51 @@ left_m = np.load('train_l_mean.npy')
 left_std = np.load('train_l_std.npy')
 right_m = np.load('train_r_mean.npy')
 right_std = np.load('train_r_std.npy')
-X_l = np.zeros((10,img_rows,img_cols,3))
-X_r = np.zeros((10,img_rows,img_cols,3))
+num_sample = 100
+if not_rand_dataset: 
+  X_l = np.zeros((num_sample,img_rows,img_cols,3))
+  X_r = np.zeros((num_sample,img_rows,img_cols,3))
 
-for i in range(10):
-  # Get sample input data as a numpy array in a method of your choosing.
-  X_l[i,] = resize(imread(left_i_train[i], as_grey=False),(1,img_rows,img_cols,3))
-  X_r[i,] = resize(imread(right_i_train[i], as_grey=False),(1,img_rows,img_cols,3))
-X_l = (X_l*255 - left_m)/left_std
-X_r = (X_r*255 - right_m)/right_std
+  for i in range(num_sample):
+    # Get sample input data as a numpy array in a method of your choosing.
+    X_l[i,] = resize(imread(left_i_train[i], as_grey=False),(1,img_rows,img_cols,3))
+    X_r[i,] = resize(imread(right_i_train[i], as_grey=False),(1,img_rows,img_cols,3))
+  X_l = (X_l*255 - left_m)/left_std
+  X_r = (X_r*255 - right_m)/right_std
 
-train = tf.convert_to_tensor(np.array(X_l, dtype='int64')) #np.swapaxes([X_l, X_r], 0,1)
-my_ds = tf.data.Dataset.from_tensor_slices((train)).batch(1)
-#iter = my_ds.make_initializable_iterator() # create the iterator
-#iter = my_ds.make_one_shot_iterator()
-#el = iter.get_next()
-#POST TRAINING QUANTIZATION
-#def representative_dataset_gen():
-#    for input_value in my_ds.take(10):
- #     yield [input_value, input_value]
-channels= 3
-def _gen_input():
-    return tf.constant(np.random.uniform(0, 1, size=(1, img_rows, img_cols, 3)), dtype=tf.float32)
+  train_l = tf.convert_to_tensor(np.array(X_l, dtype='float32')) #np.swapaxes([X_l, X_r], 0,1)
+  my_ds_l = tf.data.Dataset.from_tensor_slices((train_l)).batch(1)
+  #iter = my_ds.make_initializable_iterator() # create the iterator
+  iter_l = my_ds_l.make_one_shot_iterator()
+  el_l = iter_l.get_next()
 
-def representative_dataset_gen():
-    for _ in range(100):
-        yield [_gen_input(), _gen_input()] #yield [sess.run(input value)]'
+  train_r = tf.convert_to_tensor(np.array(X_r, dtype='float32')) #np.swapaxes([X_l, X_r], 0,1)
+  my_ds_r = tf.data.Dataset.from_tensor_slices((train_r)).batch(1)
+  #iter = my_ds.make_initializable_iterator() # create the iterator
+  iter_r = my_ds_r.make_one_shot_iterator()
+  el_r = iter_r.get_next()
+
+  #POST TRAINING QUANTIZATION
+  #def representative_dataset_gen():
+  #    for input_value in my_ds.take(num_sample):
+  #     yield [input_value, input_value]
+  def _gen_input():
+      return [tf.constant(el_l, dtype=tf.float32), tf.constant(el_r, dtype=tf.float32)]
+
+  def representative_dataset_gen():
+    for _ in range(num_sample):
+        #yield [_gen_input(), _gen_input()] #yield [sess.run(input value)]'
+        yield _gen_input() #yield [sess.run(input value)]'
+else:
+
+  def _gen_input():
+      #return tf.constant(np.random.uniform(0, 1, size=(1, img_rows, img_cols, 3)), dtype=tf.float32)
+      return tf.constant(np.random.uniform(0, 1, size=(1, img_rows, img_cols, 3)), dtype=tf.float32)
+
+  def representative_dataset_gen():
+      for _ in range(num_sample):
+          yield [_gen_input(), _gen_input()] #yield [sess.run(input value)]'
+
 
 saved_model_dir = 'C:/Users/tomil/Documents/FPGA_real_time_depth_estimation_based_on_neural_network/code/deepNeuralWork/my_model.h5'
 #tflite_model_file = tflite_models_dir/"mnist_model.tflite"
@@ -65,7 +85,8 @@ else:
   converter.optimizations = [tf.lite.Optimize.DEFAULT]
   converter.representative_dataset = representative_dataset_gen
   #converter.target_ops  = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-
+  #converter.inference_type = tf.contrib.lite.constants.QUANTIZED_UINT8
+  
 tflite_quantized_model = converter.convert()
 print("Convert model to tflite format has done!")
 # Save the tflite model
