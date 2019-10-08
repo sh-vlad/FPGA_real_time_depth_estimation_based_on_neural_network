@@ -59,7 +59,7 @@ class DataGenerator(keras.utils.Sequence):
         y = np.empty((self.batch_size,  img_rows, img_cols, 1))
         for i in range(self.batch_size):
             X_l[i,]  = resize(imread(self.paths_l[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
-            X_r[i,]  =resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
+            X_r[i,]  = resize(imread(self.paths_r[indexes[i]], as_grey=False),(self.image_rows,self.image_cols,3))
 
             rand_num_gamma = np.abs(np.random.randn()*2)
             rand_num_log = np.abs(np.random.randn())
@@ -173,7 +173,7 @@ print('-'*30)
 
 # input for the left frames
 inputs_left = Input((img_rows, img_cols, 3))
-power = 5
+power = 4
 conv1_left = SeparableConv2D(2**(power+1), (3, 3), padding='same')(inputs_left)
 #conv1_left = Conv2D(2**(power), (3, 3), activation='relu', padding='same')(conv1_left)
 if bn:
@@ -221,6 +221,7 @@ conc_lr_1 = concatenate([conv1_left, conv1_right], axis=3)
 #conc_lr_1 = BatchNormalization()(conc_lr_1)
 
 conc_lr_2 = MaxPooling2D(pool_size=(2, 2))(conc_lr_1)
+power = power + 1
 conc_lr_2 = SeparableConv2D(2**(power+1), (3, 3), padding='same')(conc_lr_2) #, activation='relu'
 if bn:
     conc_lr_2 = BatchNormalization()(conc_lr_2)
@@ -373,7 +374,7 @@ model = Model(inputs=[inputs_left, inputs_right], outputs=[conv13])
 #tf.contrib.quantize.create_training_graph(sess.graph)
 #sess.run(tf.global_variables_initializer())
 
-opt = SGD(lr = 0.01, momentum=0.9, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
+opt = SGD(lr = 0.02, momentum=0.9, decay = 0.0, nesterov=True)#Adam(lr=0.005, decay= 0.0)
 model.compile(optimizer=opt, loss='mean_absolute_error', metrics=['accuracy']) #Adam(lr=learning_rate) dice_coef
 #model.compile(loss='mean_squared_error',optimizer=Adam(lr=learning_rate, decay = decay_rate),metrics=['accuracy'])
 plot_model(model, to_file='model.png', show_shapes=True)
@@ -417,7 +418,7 @@ with open("model.json", "w") as json_file:
 print('-'*30)
 print('Creating and compiling model...')
 print('-'*30)
-model_checkpoint = ModelCheckpoint('weightsDispar', monitor='val_loss', save_best_only=True) #'val_loss'
+model_checkpoint = ModelCheckpoint('weightsDispar', monitor='val_loss', save_best_only=False) #'val_loss'
 
 print('-'*30)
 print('Fitting model...')
@@ -453,7 +454,7 @@ mask_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/depth_map
 left_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/left/*.jpg', recursive=True))
 right_i_valid = sorted(glob.glob('C:/Users/tomil/Downloads/verification/right/*.jpg', recursive=True))
 
-training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = True, frac = 1)
+training_generator = DataGenerator(mask_i_train,left_i_train,right_i_train,  is_noised = False, frac = 1)
 validation_generator = DataGenerator(mask_i_valid,left_i_valid,right_i_valid, is_noised = False, frac = 1)
 
 #dataset = tf.data.Dataset().batch(1).from_generator(training_generator,

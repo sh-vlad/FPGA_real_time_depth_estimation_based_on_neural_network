@@ -55,7 +55,7 @@ for layer in model.layers:
     weights = layer.get_weights() # list of numpy arrays
 
 # first read the test frame 
-num_frame = 16119
+num_frame = 15302
 img_left = imread('C:/Users/tomil/Downloads/test/left/'+str(num_frame)+'.jpg',
     as_gray=False)
 
@@ -69,7 +69,7 @@ img_left = resize(((img_left - np.amin(img_left))/(np.amax(img_left) - np.amin(i
 img_right = resize(((img_right - np.amin(img_right))/(np.amax(img_right) - np.amin(img_right))),(img_rows,img_cols,3))*255
 img_right = np.reshape(img_right,[1,img_rows,img_cols,3]) 
 img_left = np.reshape(img_left,[1,img_rows,img_cols,3]) 
-num_frame = 1 #321
+
 
 left_m = np.load('train_l_mean.npy')
 left_std = np.load('train_l_std.npy')
@@ -124,6 +124,6 @@ plt.imshow(np.reshape(image,[img_rows,img_cols]))
 plt.title('Output of classical algorithm')
 plt.subplot(144)
 plt.gray()
-plt.imshow(img_dm)
+plt.imshow(resize(img_dm,(img_rows,img_cols,3)))
 #plt.title('Depth Map')
 plt.show()
