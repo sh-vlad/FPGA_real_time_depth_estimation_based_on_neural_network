@@ -1,6 +1,7 @@
 //Author: Vlad Sharshin 
 //e-mail: shvladspb@gmail.com
 //`include "main_param.vh"
+`include "params/main_param.vh"
 module conv_nn
 #(
     parameter DATA_WIDTH    = 8
@@ -20,7 +21,10 @@ module conv_nn
 	output logic					            sop_o,
     output logic					            eop_o,
     output logic					            sof_o,
-    output logic					            eof_o    
+    output logic					            eof_o,
+
+    input wire [5:0]                            ddr_fifo_rd,
+    output reg [5:0]                            ddr_fifo_afull       
 );
 // 
 wire [DATA_WIDTH-1:0]   data_o_l0      ;
@@ -102,7 +106,9 @@ conv_layer_0
 	.sop_o                            ( sop_o_l0                ),
     .eop_o                            ( eop_o_l0                ),
     .sof_o                            ( sof_o_l0                ),
-    .eof_o                            ( eof_o_l0                )
+    .eof_o                            ( eof_o_l0                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[0]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[0]       )
 );
 //
 
@@ -133,18 +139,20 @@ conv_layer_1
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l0          ),     
-    .data_valid_i                     ( data_valid_o_l0    ),   
-    .sop_i                            ( sop_o_l0           ),
-    .eop_i                            ( eop_o_l0           ),
-    .sof_i                            ( sof_o_l0           ),
-    .eof_i                            ( eof_o_l0           ),
-    .data_o                           ( data_o_l1          ),
-    .data_valid_o                     ( data_valid_o_l1    ),
-	.sop_o                            ( sop_o_l1           ),
-    .eop_o                            ( eop_o_l1           ),
-    .sof_o                            ( sof_o_l1           ),
-    .eof_o                            ( eof_o_l1           )
+	.data_i                           ( data_o_l0               ),     
+    .data_valid_i                     ( data_valid_o_l0         ),   
+    .sop_i                            ( sop_o_l0                ),
+    .eop_i                            ( eop_o_l0                ),
+    .sof_i                            ( sof_o_l0                ),
+    .eof_i                            ( eof_o_l0                ),
+    .data_o                           ( data_o_l1               ),
+    .data_valid_o                     ( data_valid_o_l1         ),
+	.sop_o                            ( sop_o_l1                ),
+    .eop_o                            ( eop_o_l1                ),
+    .sof_o                            ( sof_o_l1                ),
+    .eof_o                            ( eof_o_l1                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[1]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[1]       )
 );
 //
 conv_layer
@@ -174,18 +182,20 @@ conv_layer_2
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l1          ),     
-    .data_valid_i                     ( data_valid_o_l1    ),   
-    .sop_i                            ( sop_o_l1           ),
-    .eop_i                            ( eop_o_l1           ),
-    .sof_i                            ( sof_o_l1           ),
-    .eof_i                            ( eof_o_l1           ),
-    .data_o                           ( data_o_l2          ),
-    .data_valid_o                     ( data_valid_o_l2    ),
-	.sop_o                            ( sop_o_l2           ),
-    .eop_o                            ( eop_o_l2           ),
-    .sof_o                            ( sof_o_l2           ),
-    .eof_o                            ( eof_o_l2           )
+	.data_i                           ( data_o_l1               ),     
+    .data_valid_i                     ( data_valid_o_l1         ),   
+    .sop_i                            ( sop_o_l1                ),
+    .eop_i                            ( eop_o_l1                ),
+    .sof_i                            ( sof_o_l1                ),
+    .eof_i                            ( eof_o_l1                ),
+    .data_o                           ( data_o_l2               ),
+    .data_valid_o                     ( data_valid_o_l2         ),
+	.sop_o                            ( sop_o_l2                ),
+    .eop_o                            ( eop_o_l2                ),
+    .sof_o                            ( sof_o_l2                ),
+    .eof_o                            ( eof_o_l2                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[2]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[2]       )
 );
 //
 conv_layer
@@ -215,18 +225,20 @@ conv_layer_3
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l2          ),     
-    .data_valid_i                     ( data_valid_o_l2    ),   
-    .sop_i                            ( sop_o_l2           ),
-    .eop_i                            ( eop_o_l2           ),
-    .sof_i                            ( sof_o_l2           ),
-    .eof_i                            ( eof_o_l2           ),
-    .data_o                           ( data_o_l3          ),
-    .data_valid_o                     ( data_valid_o_l3    ),
-	.sop_o                            ( sop_o_l3           ),
-    .eop_o                            ( eop_o_l3           ),
-    .sof_o                            ( sof_o_l3           ),
-    .eof_o                            ( eof_o_l3           )
+	.data_i                           ( data_o_l2               ),     
+    .data_valid_i                     ( data_valid_o_l2         ),   
+    .sop_i                            ( sop_o_l2                ),
+    .eop_i                            ( eop_o_l2                ),
+    .sof_i                            ( sof_o_l2                ),
+    .eof_i                            ( eof_o_l2                ),
+    .data_o                           ( data_o_l3               ),
+    .data_valid_o                     ( data_valid_o_l3         ),
+	.sop_o                            ( sop_o_l3                ),
+    .eop_o                            ( eop_o_l3                ),
+    .sof_o                            ( sof_o_l3                ),
+    .eof_o                            ( eof_o_l3                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[3]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[3]       )
 );
 //
 conv_layer
@@ -256,18 +268,20 @@ conv_layer_4
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l3          ),     
-    .data_valid_i                     ( data_valid_o_l3    ),   
-    .sop_i                            ( sop_o_l3           ),
-    .eop_i                            ( eop_o_l3           ),
-    .sof_i                            ( sof_o_l3           ),
-    .eof_i                            ( eof_o_l3           ),
-    .data_o                           ( data_o_l4          ),
-    .data_valid_o                     ( data_valid_o_l4    ),
-	.sop_o                            ( sop_o_l4           ),
-    .eop_o                            ( eop_o_l4           ),
-    .sof_o                            ( sof_o_l4           ),
-    .eof_o                            ( eof_o_l4           )
+	.data_i                           ( data_o_l3               ),     
+    .data_valid_i                     ( data_valid_o_l3         ),   
+    .sop_i                            ( sop_o_l3                ),
+    .eop_i                            ( eop_o_l3                ),
+    .sof_i                            ( sof_o_l3                ),
+    .eof_i                            ( eof_o_l3                ),
+    .data_o                           ( data_o_l4               ),
+    .data_valid_o                     ( data_valid_o_l4         ),
+	.sop_o                            ( sop_o_l4                ),
+    .eop_o                            ( eop_o_l4                ),
+    .sof_o                            ( sof_o_l4                ),
+    .eof_o                            ( eof_o_l4                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[4]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[4]       )    
 );
 //
 
@@ -298,18 +312,20 @@ conv_layer_5
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l4          ),     
-    .data_valid_i                     ( data_valid_o_l4    ),   
-    .sop_i                            ( sop_o_l4           ),
-    .eop_i                            ( eop_o_l4           ),
-    .sof_i                            ( sof_o_l4           ),
-    .eof_i                            ( eof_o_l4           ),
-    .data_o                           ( data_o_l5          ),
-    .data_valid_o                     ( data_valid_o_l5    ),
-	.sop_o                            ( sop_o_l5           ),
-    .eop_o                            ( eop_o_l5           ),
-    .sof_o                            ( sof_o_l5           ),
-    .eof_o                            ( eof_o_l5           )
+	.data_i                           ( data_o_l4               ),     
+    .data_valid_i                     ( data_valid_o_l4         ),   
+    .sop_i                            ( sop_o_l4                ),
+    .eop_i                            ( eop_o_l4                ),
+    .sof_i                            ( sof_o_l4                ),
+    .eof_i                            ( eof_o_l4                ),
+    .data_o                           ( data_o_l5               ),
+    .data_valid_o                     ( data_valid_o_l5         ),
+	.sop_o                            ( sop_o_l5                ),
+    .eop_o                            ( eop_o_l5                ),
+    .sof_o                            ( sof_o_l5                ),
+    .eof_o                            ( eof_o_l5                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[5]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[5]       )
 );
 
 assign data_o       = data_o_l5      ;
@@ -318,38 +334,6 @@ assign sop_o        = sop_o_l5       ;
 assign eop_o        = eop_o_l5       ;
 assign sof_o        = sof_o_l5       ;
 assign eof_o        = eof_o_l5       ;
-/*
-assign data_o       = data_o_l1      ;
-assign data_valid_o = data_valid_o_l1;
-assign sop_o        = sop_o_l1       ;
-assign eop_o        = eop_o_l1       ;
-assign sof_o        = sof_o_l1       ;
-assign eof_o        = eof_o_l1       ;
-*/
 
-up_sampling
-#(
-    .DATA_WIDTH        ( 8              ),
-    .STRING_LEN        ( 7              ),
-    .CHANNEL_NUM       ( 256            ),
-    .DATA_O_WIDTH      ( DATA_WIDTH     )
-)
-up_sampling_test
-(
-    .clk                ( clk            ),
-    .reset_n            ( reset_n        ),
-    .data_i             ( data_o_l5      ),
-	.valid_i            ( data_valid_o_l5),
-    .sop_i              ( sop_o_l5       ),
-    .eop_i              ( eop_o_l5       ),
-    .sof_i              ( sof_o_l5       ),
-    .eof_i              ( eof_o_l5       ),
-    .data_o             ( ),
-    .data_valid_o       ( ),
-    .sop_o              ( ),
-    .eop_o              ( ),
-    .sof_o              ( ),
-    .eof_o              ( )
-);
 endmodule
 

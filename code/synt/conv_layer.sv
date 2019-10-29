@@ -2,6 +2,7 @@
 //e-mail: shvladspb@gmail.com
 module conv_layer
 #(
+    parameter MAX_POOL_OFF                      = 0,                                                    
 /*
     parameter DATA_WIDTH    = 8,
     parameter CHAN_NUM      = 3
@@ -49,12 +50,15 @@ module conv_layer
     input wire						            sof_i,
     input wire						            eof_i,   
 
-    output wire [STRING2MATRIX_DATA_WIDTH-1:0]  data_o,
-    output wire                                 data_valid_o,
+    output logic [STRING2MATRIX_DATA_WIDTH-1:0] data_o,
+    output logic                                data_valid_o,
 	output logic					            sop_o,
     output logic					            eop_o,
     output logic					            sof_o,
-    output logic					            eof_o    
+    output logic					            eof_o,  
+    
+    input wire                                  ddr_fifo_rd,
+    output reg                                  ddr_fifo_afull                                                            
 );
 
 /*
@@ -252,40 +256,96 @@ ReLu_inst
     .eof_o             ( eof_ReLu                   )
 );
 //
-max_pool 
-#(
-    .DATA_WIDTH 	  ( MAX_POOL_DATA_WIDTH         ),
-    .CHANNEL_NUM      ( MAX_POOL_CHANNEL_NUM        ),
-    .HOLD_DATA        ( MAX_POOL_HOLD_DATA          ),
-    .STRING_LEN       ( MAX_POOL_STRING_LEN         )
-)
-max_pool_inst
-(
-    .clk              ( clk                         ),  
-    .reset_n          ( reset_n                     ),
-    .data_i           ( data_ReLu                   ),    
- 	.valid_i          ( data_ReLu_valid             ),   
-    .sop_i            ( sop_ReLu                    ),
-    .eop_i            ( eop_ReLu                    ),
-    .sof_i            ( sof_ReLu                    ),  
-    .eof_i            ( eof_ReLu                    ),
+generate
+    if ( MAX_POOL_OFF == 0 )
+        begin: max_pool_gen
+            max_pool 
+            #(
+                .DATA_WIDTH 	  ( MAX_POOL_DATA_WIDTH         ),
+                .CHANNEL_NUM      ( MAX_POOL_CHANNEL_NUM        ),
+                .HOLD_DATA        ( MAX_POOL_HOLD_DATA          ),
+                .STRING_LEN       ( MAX_POOL_STRING_LEN         )
+            )
+            max_pool_inst
+            (
+                .clk              ( clk                         ),  
+                .reset_n          ( reset_n                     ),
+                .data_i           ( data_ReLu                   ),    
+                .valid_i          ( data_ReLu_valid             ),   
+                .sop_i            ( sop_ReLu                    ),
+                .eop_i            ( eop_ReLu                    ),
+                .sof_i            ( sof_ReLu                    ),  
+                .eof_i            ( eof_ReLu                    ),
 
-    .data_o           ( data_max_pool               ),
-    .data_valid_o     ( data_max_pool_valid         ),
-    .sop_o            ( sop_max_pool                ),
-    .eop_o            ( eop_max_pool                ),
-    .sof_o            ( sof_max_pool                ),  
-    .eof_o            ( eof_max_pool                )
-);
-
+                .data_o           ( data_max_pool               ),
+                .data_valid_o     ( data_max_pool_valid         ),
+                .sop_o            ( sop_max_pool                ),
+                .eop_o            ( eop_max_pool                ),
+                .sof_o            ( sof_max_pool                ),  
+                .eof_o            ( eof_max_pool                )
+            );
+            
+            assign data_o       = data_max_pool      ;
+            assign data_valid_o = data_max_pool_valid;
+            assign sop_o        = sop_max_pool       ;
+            assign eop_o        = eop_max_pool       ;
+            assign sof_o        = sof_max_pool       ;
+            assign eof_o        = eof_max_pool       ; 
+        end
+    else if ( MAX_POOL_OFF == 1 )
+        begin: not_max_pool_gen
+            assign data_o       = data_ReLu       ;
+            assign data_valid_o = data_ReLu_valid ;
+            assign sop_o        = sop_ReLu        ;
+            assign eop_o        = eop_ReLu        ;
+            assign sof_o        = sof_ReLu        ;
+            assign eof_o        = eof_ReLu        ;
+        end
+endgenerate 
 /*
 
 */
-assign data_o       = data_max_pool      ;
-assign data_valid_o = data_max_pool_valid;
-assign sop_o        = sop_max_pool       ;
-assign eop_o        = eop_max_pool       ;
-assign sof_o        = sof_max_pool       ;
-assign eof_o        = eof_max_pool       ;
+wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] wrusedw;
+wire wrfull;
+
+dcfifo_mixed_widths
+#(
+    .intended_device_family     ( "Cyclone V"                                   ),
+    .lpm_numwords               ( STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM ),
+    .lpm_showahead              ( "OFF"                 ),
+    .lpm_type                   ( "dcfifo_mixed_widths" ),   
+    .lpm_width                  ( 8                     ),
+    .lpm_widthu                 ( $clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)),
+    .lpm_widthu_r               ( $clog2((STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/8)),
+    .lpm_width_r                ( 64                    ),
+    .overflow_checking          ( "ON"                  ),
+    .rdsync_delaypipe           ( 4                     ),
+    .underflow_checking         ( "ON"                  ),
+    .use_eab                    ( "ON"                  ),
+    .wrsync_delaypipe           ( 4                     )
+)    
+dcfifo_inst 
+(
+	.data           ( data_o                ),
+	.rdclk          ( clk                   ),
+	.rdreq          ( ddr_fifo_rd           ),
+	.wrclk          ( clk                   ),
+	.wrreq          ( data_valid_o          ),
+	.q              (),
+	.rdempty        (),
+	.rdusedw        (),
+	.wrfull         (wrfull),
+	.wrusedw        ( wrusedw               ),
+	.aclr           ( 1'h0),
+	.eccstatus      (),
+	.rdfull         (),
+	.wrempty        ()
+);
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        ddr_fifo_afull <= 1'h0;
+    else
+        ddr_fifo_afull <= ( wrusedw >= (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
 endmodule
 

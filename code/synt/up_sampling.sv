@@ -55,6 +55,7 @@ logic                                    fifo_input_wr;
 wire [LPM_WIDTHU_INPUT-1:0]              fifo_input_usedw;
 wire                                     fifo_input_empty;
 logic                                    fifo_input_valid;
+reg [$clog2(STRING_LEN*2)-1:0]            line_cnt;
 ///////////////////////////////////
       
 scfifo
@@ -213,8 +214,8 @@ always @( posedge clk or negedge reset_n )
     else
         data_valid_o <= (sh_fifo_short_rd[0] | fifo_input_valid | (sh_fifo_long_rd && !sh_fifo_long_empty) )  ; 
  
-reg [$clog2(CHANNEL_NUM*STRING_LEN*2)-1:0] cnt_sampls;
-reg [$clog2(CHANNEL_NUM*2)-1:0]            chnl_cnt;
+reg [$clog2(CHANNEL_NUM*STRING_LEN*2):0] cnt_sampls;
+reg [$clog2(CHANNEL_NUM*2):0]            chnl_cnt;
 
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
@@ -238,10 +239,19 @@ always @( posedge clk or negedge reset_n )
         else if ( chnl_cnt == CHANNEL_NUM*2 )
             cnt_sampls <= cnt_sampls + 1'h1;
 
-assign sop_o = ( chnl_cnt == 1 ) & ( cnt_sampls == 0 );
-assign eop_o = ( chnl_cnt == CHANNEL_NUM*2 && (cnt_sampls == (STRING_LEN*2)-1) );
-/*
-assign sof_o = ( chnl_cnt == 1 ) & ( cnt_sampls == 0 );
-assign eof_o = ( chnl_cnt == STRING_LEN*2 ) & ( cnt_sampls == STRING_LEN*2-1 );     
-*/       
+always @( posedge clk or posedge reset_n )
+    if ( !reset_n )
+        line_cnt <= '0;
+    else
+        if ( eop_o && line_cnt == STRING_LEN*2-1 )
+            line_cnt <= '0;    
+        else if ( eop_o )
+            line_cnt <= line_cnt + 1;
+            
+assign sop_o = ( chnl_cnt == 1 ) & ( ( cnt_sampls == 0 ) || ( cnt_sampls == STRING_LEN ) );
+assign eop_o =  chnl_cnt == CHANNEL_NUM*2 && ( (cnt_sampls == STRING_LEN*2-1) || (cnt_sampls == STRING_LEN-1) );
+
+assign sof_o = sop_o & line_cnt == 0/*( chnl_cnt == 1 ) & ( cnt_sampls == 0 )*/;
+assign eof_o = eop_o & line_cnt == STRING_LEN*2-1/*( chnl_cnt == CHANNEL_NUM*2 ) & ( cnt_sampls == STRING_LEN*2-1 )*/;     
+       
 endmodule

@@ -1,6 +1,7 @@
 //Author: Vlad Sharshin 
 //e-mail: shvladspb@gmail.com
 //`include "main_param.vh"
+`include "params/main_param.vh"
 module deconv_nn
 #(
     parameter DATA_WIDTH    = 8

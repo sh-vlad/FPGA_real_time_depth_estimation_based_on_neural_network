@@ -54,7 +54,11 @@ module deconv_layer
 	output logic                                sop_o,
     output logic                                eop_o,
     output logic                                sof_o,
-    output logic                                eof_o    
+    output logic                                eof_o,
+
+    input wire [63:0]                           ddr_data,
+    input wire [63:0]                           ddr_data_valid,
+    output logic                                 ddr_fifo_aempty
 );
 
 
@@ -219,6 +223,7 @@ up_sampling
     .CHANNEL_NUM       ( MAX_POOL_CHANNEL_NUM       ),
     .DATA_O_WIDTH      ( UP_SAMPLING_DATA_WIDTH     )
 )
+up_sampling_inst
 (
     .clk               ( clk                        ), 
     .reset_n           ( reset_n                    ),
@@ -243,5 +248,49 @@ assign sop_o        = sop_up_sampling       ;
 assign eop_o        = eop_up_sampling       ;
 assign sof_o        = sof_up_sampling       ;
 assign eof_o        = eof_up_sampling       ;
+
+wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] rdusedw;
+wire wrfull;
+
+dcfifo_mixed_widths
+#(
+    .intended_device_family     ( "Cyclone V"                                   ),
+    .lpm_numwords               ( STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM/8 ),
+    .lpm_showahead              ( "OFF"                 ),
+    .lpm_type                   ( "dcfifo_mixed_widths" ),   
+    .lpm_width                  ( 64                     ),
+    .lpm_widthu                 ( $clog2((STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/8)),
+    .lpm_widthu_r               ( $clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)),
+    .lpm_width_r                ( 8                    ),
+    .overflow_checking          ( "ON"                  ),
+    .rdsync_delaypipe           ( 4                     ),
+    .underflow_checking         ( "ON"                  ),
+    .use_eab                    ( "ON"                  ),
+    .wrsync_delaypipe           ( 4                     )
+)    
+dcfifo_inst 
+(
+	.data           ( ddr_data              ),
+	.rdclk          ( clk                   ),
+	.rdreq          ( ddr_data_valid        ),
+	.wrclk          ( clk                   ),
+	.wrreq          (           ),
+	.q              (),
+	.rdempty        (),
+	.rdusedw        ( rdusedw ),
+	.wrfull         (),
+	.wrusedw        (                ),
+	.aclr           ( 1'h0),
+	.eccstatus      (),
+	.rdfull         (),
+	.wrempty        ()
+);
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        ddr_fifo_aempty <= 1'h0;
+    else
+        ddr_fifo_aempty <= ( rdusedw < (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
+        
 endmodule
 
