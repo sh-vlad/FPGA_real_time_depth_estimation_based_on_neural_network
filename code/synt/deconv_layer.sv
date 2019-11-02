@@ -57,8 +57,10 @@ module deconv_layer
     output logic                                eof_o,
 
     input wire [63:0]                           ddr_data,
-    input wire [63:0]                           ddr_data_valid,
-    output logic                                 ddr_fifo_aempty
+    input wire                                  ddr_data_valid,
+    output logic                                ddr_fifo_aempty,
+	
+	input wire									frame_exist
 );
 
 
@@ -109,6 +111,7 @@ wire            					eop_up_sampling;
 wire            					sof_up_sampling;
 wire            					eof_up_sampling;
 //
+reg									concat;
 // convert string to matrix
 string2matrix_v2
 #(
@@ -249,6 +252,67 @@ assign eop_o        = eop_up_sampling       ;
 assign sof_o        = sof_up_sampling       ;
 assign eof_o        = eof_up_sampling       ;
 
+///////
+reg [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] concat_smpl_cnt;
+reg [$clog2(STRING2MATRIX_STRING_LEN/2)                   -1:0] concat_line_cnt;
+reg [4:0]                                                       concat_line_hold_cnt;
+
+reg [STRING2MATRIX_DATA_WIDTH-1:0]   data;
+reg                                  data_valid;
+reg                                  sop;
+reg                                  eop;
+reg                                  sof;
+reg                                  eof;
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        concat <= 1'h0;
+    else
+        if ( eof_o )
+            concat <= 1'h1;
+        else if ( (concat_smpl_cnt == (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1) && (concat_line_cnt==(STRING2MATRIX_STRING_LEN/2)-1))
+            concat <= 1'h0;
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        concat_smpl_cnt <= '0;
+    else
+        if ( concat )
+            if ( concat_smpl_cnt == (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1 )
+                concat_smpl_cnt <= 0;
+            else if ( concat_line_hold_cnt == 0 )
+                concat_smpl_cnt <= concat_smpl_cnt + 1'h1;
+        else 
+            concat_smpl_cnt <= '0;
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        concat_line_cnt <= '0;
+    else
+        if ( (concat_smpl_cnt == (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1) && (concat_line_cnt==(STRING2MATRIX_STRING_LEN/2)-1))
+            concat_line_cnt <= '0;
+        else if ( concat_smpl_cnt == (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1 )
+            concat_line_cnt <= concat_line_cnt + 1'h1;
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        concat_line_hold_cnt <= '0;
+    else 
+        if ( concat_line_hold_cnt != 0 )
+            concat_line_hold_cnt <= concat_line_hold_cnt + 1'h1;
+        else if ( concat_smpl_cnt == (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1 )
+            concat_line_hold_cnt <= 1;
+          
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        data_valid <= 1'h0;
+    else
+        if ( concat_smpl_cnt != 0 )
+            data_valid <= 1'h1;
+        else
+            data_valid <= 1'h0;
+
+//            
 wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] rdusedw;
 wire wrfull;
 
@@ -272,9 +336,9 @@ dcfifo_inst
 (
 	.data           ( ddr_data              ),
 	.rdclk          ( clk                   ),
-	.rdreq          ( ddr_data_valid        ),
+	.rdreq          ( concat_smpl_cnt != 0  ),
 	.wrclk          ( clk                   ),
-	.wrreq          (           ),
+	.wrreq          ( ddr_data_valid        ),
 	.q              (),
 	.rdempty        (),
 	.rdusedw        ( rdusedw ),
@@ -290,7 +354,15 @@ always @( posedge clk or negedge reset_n )
     if ( !reset_n )
         ddr_fifo_aempty <= 1'h0;
     else
-        ddr_fifo_aempty <= ( rdusedw < (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
-        
+        ddr_fifo_aempty <= ( rdusedw < (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) && concat ? 1'h1: 1'h0;
+
+
+`ifdef SYNT
+`else
+    always @(posedge clk)   
+        begin
+            assert ( !(eof_o&&concat) ) else begin $error("eof_o&&concat!!!"); $stop; end; 
+        end
+`endif              
 endmodule
 

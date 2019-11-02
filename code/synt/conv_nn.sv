@@ -287,7 +287,7 @@ conv_layer_4
 
 conv_layer
 #(
-
+    .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[5]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[5]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[5]    ),

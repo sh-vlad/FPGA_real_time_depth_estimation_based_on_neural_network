@@ -21,7 +21,11 @@ module deconv_nn
 	output logic					            sop_o,
     output logic					            eop_o,
     output logic					            sof_o,
-    output logic					            eof_o    
+    output logic					            eof_o,
+
+    input wire  [63:0]                          ddr_data,
+    input wire  [5:0]                           ddr_data_valid,
+    output wire [5:0]                           ddr_fifo_aempty    
 );
 // 
 wire [DATA_WIDTH-1:0]   data_o_l0      ;
@@ -104,7 +108,12 @@ layer_0
 	.sop_o                            ( sop_o_l0                ),
     .eop_o                            ( eop_o_l0                ),
     .sof_o                            ( sof_o_l0                ),
-    .eof_o                            ( eof_o_l0                )
+    .eof_o                            ( eof_o_l0                ),
+    
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[0]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[0]         )
+    
 );
 //
 
@@ -135,18 +144,22 @@ layer_1
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l0          ),     
-    .data_valid_i                     ( data_valid_o_l0    ),   
-    .sop_i                            ( sop_o_l0           ),
-    .eop_i                            ( eop_o_l0           ),
-    .sof_i                            ( sof_o_l0           ),
-    .eof_i                            ( eof_o_l0           ),
-    .data_o                           ( data_o_l1          ),
-    .data_valid_o                     ( data_valid_o_l1    ),
-	.sop_o                            ( sop_o_l1           ),
-    .eop_o                            ( eop_o_l1           ),
-    .sof_o                            ( sof_o_l1           ),
-    .eof_o                            ( eof_o_l1           )
+	.data_i                           ( data_o_l0               ),     
+    .data_valid_i                     ( data_valid_o_l0         ),   
+    .sop_i                            ( sop_o_l0                ),
+    .eop_i                            ( eop_o_l0                ),
+    .sof_i                            ( sof_o_l0                ),
+    .eof_i                            ( eof_o_l0                ),
+    .data_o                           ( data_o_l1               ),
+    .data_valid_o                     ( data_valid_o_l1         ),
+	.sop_o                            ( sop_o_l1                ),
+    .eop_o                            ( eop_o_l1                ),
+    .sof_o                            ( sof_o_l1                ),
+    .eof_o                            ( eof_o_l1                ),
+    
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[1]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[1]         ) 
 );
 //
 deconv_layer
@@ -176,18 +189,22 @@ layer_2
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l1          ),     
-    .data_valid_i                     ( data_valid_o_l1    ),   
-    .sop_i                            ( sop_o_l1           ),
-    .eop_i                            ( eop_o_l1           ),
-    .sof_i                            ( sof_o_l1           ),
-    .eof_i                            ( eof_o_l1           ),
-    .data_o                           ( data_o_l2          ),
-    .data_valid_o                     ( data_valid_o_l2    ),
-	.sop_o                            ( sop_o_l2           ),
-    .eop_o                            ( eop_o_l2           ),
-    .sof_o                            ( sof_o_l2           ),
-    .eof_o                            ( eof_o_l2           )
+	.data_i                           ( data_o_l1               ),     
+    .data_valid_i                     ( data_valid_o_l1         ),   
+    .sop_i                            ( sop_o_l1                ),
+    .eop_i                            ( eop_o_l1                ),
+    .sof_i                            ( sof_o_l1                ),
+    .eof_i                            ( eof_o_l1                ),
+    .data_o                           ( data_o_l2               ),
+    .data_valid_o                     ( data_valid_o_l2         ),
+	.sop_o                            ( sop_o_l2                ),
+    .eop_o                            ( eop_o_l2                ),
+    .sof_o                            ( sof_o_l2                ),
+    .eof_o                            ( eof_o_l2                ),
+    
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[2]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[2]         )  
 );
 //
 deconv_layer
@@ -217,18 +234,22 @@ layer_3
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l2          ),     
-    .data_valid_i                     ( data_valid_o_l2    ),   
-    .sop_i                            ( sop_o_l2           ),
-    .eop_i                            ( eop_o_l2           ),
-    .sof_i                            ( sof_o_l2           ),
-    .eof_i                            ( eof_o_l2           ),
-    .data_o                           ( data_o_l3          ),
-    .data_valid_o                     ( data_valid_o_l3    ),
-	.sop_o                            ( sop_o_l3           ),
-    .eop_o                            ( eop_o_l3           ),
-    .sof_o                            ( sof_o_l3           ),
-    .eof_o                            ( eof_o_l3           )
+	.data_i                           ( data_o_l2               ),     
+    .data_valid_i                     ( data_valid_o_l2         ),   
+    .sop_i                            ( sop_o_l2                ),
+    .eop_i                            ( eop_o_l2                ),
+    .sof_i                            ( sof_o_l2                ),
+    .eof_i                            ( eof_o_l2                ),
+    .data_o                           ( data_o_l3               ),
+    .data_valid_o                     ( data_valid_o_l3         ),
+	.sop_o                            ( sop_o_l3                ),
+    .eop_o                            ( eop_o_l3                ),
+    .sof_o                            ( sof_o_l3                ),
+    .eof_o                            ( eof_o_l3                ),
+    
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[3]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[3]         )  
 );
 //
 deconv_layer
@@ -258,18 +279,22 @@ layer_4
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l3          ),     
-    .data_valid_i                     ( data_valid_o_l3    ),   
-    .sop_i                            ( sop_o_l3           ),
-    .eop_i                            ( eop_o_l3           ),
-    .sof_i                            ( sof_o_l3           ),
-    .eof_i                            ( eof_o_l3           ),
-    .data_o                           ( data_o_l4          ),
-    .data_valid_o                     ( data_valid_o_l4    ),
-	.sop_o                            ( sop_o_l4           ),
-    .eop_o                            ( eop_o_l4           ),
-    .sof_o                            ( sof_o_l4           ),
-    .eof_o                            ( eof_o_l4           )
+	.data_i                           ( data_o_l3               ),     
+    .data_valid_i                     ( data_valid_o_l3         ),   
+    .sop_i                            ( sop_o_l3                ),
+    .eop_i                            ( eop_o_l3                ),
+    .sof_i                            ( sof_o_l3                ),
+    .eof_i                            ( eof_o_l3                ),
+    .data_o                           ( data_o_l4               ),
+    .data_valid_o                     ( data_valid_o_l4         ),
+	.sop_o                            ( sop_o_l4                ),
+    .eop_o                            ( eop_o_l4                ),
+    .sof_o                            ( sof_o_l4                ),
+    .eof_o                            ( eof_o_l4                ),
+    
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[4]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[4]         ) 
 );
 //
 
@@ -300,18 +325,21 @@ layer_5
 (
 	.clk                              ( clk                     ),      
     .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l4          ),     
-    .data_valid_i                     ( data_valid_o_l4    ),   
-    .sop_i                            ( sop_o_l4           ),
-    .eop_i                            ( eop_o_l4           ),
-    .sof_i                            ( sof_o_l4           ),
-    .eof_i                            ( eof_o_l4           ),
-    .data_o                           ( data_o_l5          ),
-    .data_valid_o                     ( data_valid_o_l5    ),
-	.sop_o                            ( sop_o_l5           ),
-    .eop_o                            ( eop_o_l5           ),
-    .sof_o                            ( sof_o_l5           ),
-    .eof_o                            ( eof_o_l5           )
+	.data_i                           ( data_o_l4               ),     
+    .data_valid_i                     ( data_valid_o_l4         ),   
+    .sop_i                            ( sop_o_l4                ),
+    .eop_i                            ( eop_o_l4                ),
+    .sof_i                            ( sof_o_l4                ),
+    .eof_i                            ( eof_o_l4                ),
+    .data_o                           ( data_o_l5               ),
+    .data_valid_o                     ( data_valid_o_l5         ),
+	.sop_o                            ( sop_o_l5                ),
+    .eop_o                            ( eop_o_l5                ),
+    .sof_o                            ( sof_o_l5                ),
+    .eof_o                            ( eof_o_l5                ),
+    .ddr_data                         ( ddr_data                ),
+    .ddr_data_valid                   ( ddr_data_valid[5]          ),
+    .ddr_fifo_aempty                  ( ddr_fifo_aempty[5]         ) 
 );
 
 assign data_o       = data_o_l5      ;
