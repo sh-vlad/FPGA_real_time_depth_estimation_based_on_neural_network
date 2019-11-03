@@ -29,22 +29,52 @@ module concat_FSM
 // 
 reg [4:0]   stop;
 reg [7:0]   smpl_cnt;         
-reg [2:0]   layer_cnt;   
+reg [2:0]   layer_wr_cnt;   
+reg [2:0]   layer_rd_cnt;   
 reg         all_reg_wr;
 reg         all_reg_rd;
-reg         work_done;
+reg         work_done_wr;
+reg         work_done_rd;
 reg [26:0]  addr_wr[5:0];
 reg [26:0]  addr_rd[5:0];
+reg         buf_wr;
+reg [1:0]   buf_rd;
 
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
-        layer_cnt <= '0;
+        buf_wr <= 1'h0;
     else
-        if ( layer_cnt == 5 )
-            layer_cnt <= '0;
-        else if ( work_done )
-            layer_cnt <= layer_cnt + 1;
-
+        if ( conv_eof )
+            buf_wr <= ~buf_wr;
+            
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        buf_rd <= 2'h0;
+    else
+        begin
+            if ( conv_eof )
+                buf_rd[1] <= 1'h1;      
+            if ( deconv_eof )
+                buf_rd[0] <= ~buf_rd[0];
+        end
+        
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        layer_wr_cnt <= '0;
+    else
+        if ( layer_wr_cnt == 5 )
+            layer_wr_cnt <= '0;
+        else if ( work_done_wr )
+            layer_wr_cnt <= layer_wr_cnt + 1;
+            
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        layer_rd_cnt <= '0;
+    else
+        if ( layer_rd_cnt == 5 )
+            layer_rd_cnt <= '0;
+        else if ( work_done_rd )
+            layer_rd_cnt <= layer_rd_cnt + 1;
         
 enum reg [3:0] 
 {
@@ -79,7 +109,7 @@ always_comb
             idle:                                   ns = wr_wait;
             wr_wait:    begin
                             if ( all_reg_wr ) 
-                                    case ( layer_cnt )
+                                    case ( layer_wr_cnt )
                                         3'd0:   begin
                                                     casez ( req_wr )
                                                         6'b?????1: ns = wr_0;
@@ -153,7 +183,7 @@ always_comb
                         end
             rd_wait:    begin
                             if ( all_reg_rd ) 
-                                    case ( layer_cnt )
+                                    case ( layer_wr_cnt )
                                         3'd0:   begin
                                                     casez ( req_rd )
                                                         6'b?????1: ns = rd_0;
@@ -225,19 +255,19 @@ always_comb
                                     endcase
                             else                        ns = wr_wait;
                         end   
-            wr_0:       if ( work_done )            ns = rd_wait;
-            wr_1:       if ( work_done )            ns = rd_wait;
-            wr_2:       if ( work_done )            ns = rd_wait;
-            wr_3:       if ( work_done )            ns = rd_wait;
-            wr_4:       if ( work_done )            ns = rd_wait;
-            wr_5:       if ( work_done )            ns = rd_wait;
+            wr_0:       if ( work_done_wr )            ns = rd_wait;
+            wr_1:       if ( work_done_wr )            ns = rd_wait;
+            wr_2:       if ( work_done_wr )            ns = rd_wait;
+            wr_3:       if ( work_done_wr )            ns = rd_wait;
+            wr_4:       if ( work_done_wr )            ns = rd_wait;
+            wr_5:       if ( work_done_wr )            ns = rd_wait;
             
-            rd_0:       if ( work_done )            ns = wr_wait;
-            rd_1:       if ( work_done )            ns = wr_wait;
-            rd_2:       if ( work_done )            ns = wr_wait;
-            rd_3:       if ( work_done )            ns = wr_wait;
-            rd_4:       if ( work_done )            ns = wr_wait;    
-            rd_5:       if ( work_done )            ns = wr_wait;               
+            rd_0:       if ( work_done_rd )            ns = wr_wait;
+            rd_1:       if ( work_done_rd )            ns = wr_wait;
+            rd_2:       if ( work_done_rd )            ns = wr_wait;
+            rd_3:       if ( work_done_rd )            ns = wr_wait;
+            rd_4:       if ( work_done_rd )            ns = wr_wait;    
+            rd_5:       if ( work_done_rd )            ns = wr_wait;               
             default:                                ns = idle;
         endcase
     end
@@ -249,7 +279,7 @@ always @( posedge clk )
     all_reg_wr <= |req_wr;
     
 always @( posedge clk )
-    all_reg_rd <= |req_rd;   
+    all_reg_rd <= |req_rd & buf_rd[1];   
 
     
     
@@ -278,22 +308,42 @@ always @( posedge clk or negedge reset_n )
 
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
-        work_done <= 0;
+        work_done_wr <= 0;
     else        
-        if ( ( cs == wr_0 || cs == rd_0 ) && smpl_cnt == 16*112/8-1 )
-            work_done <= 1;
-        else if ( ( cs == wr_1 || cs == rd_1 ) && smpl_cnt == 16*56/8-1 )
-            work_done <= 1;   
-        else if ( ( cs == wr_2 || cs == rd_2 ) && smpl_cnt == 32*28/8-1 )
-            work_done <= 1;        
-        else if ( ( cs == wr_3 || cs == rd_3 ) && smpl_cnt == 64*14/8-1 )
-            work_done <= 1;  
-        else if ( ( cs == wr_4 || cs == rd_4 ) && smpl_cnt == 128*7/8-1 )
-            work_done <= 1;   
-        else if ( ( cs == wr_5 || cs == rd_5 ) && smpl_cnt == 256*1/8-1 )
-            work_done <= 1;                 
+        if ( ( cs == wr_0  ) && smpl_cnt == 16*112/8-1 )
+            work_done_wr <= 1;
+        else if ( ( cs == wr_1  ) && smpl_cnt == 16*56/8-1 )
+            work_done_wr <= 1;   
+        else if ( ( cs == wr_2  ) && smpl_cnt == 32*28/8-1 )
+            work_done_wr <= 1;        
+        else if ( ( cs == wr_3  ) && smpl_cnt == 64*14/8-1 )
+            work_done_wr <= 1;  
+        else if ( ( cs == wr_4  ) && smpl_cnt == 128*7/8-1 )
+            work_done_wr <= 1;   
+        else if ( ( cs == wr_5  ) && smpl_cnt == 256*1/8-1 )
+            work_done_wr <= 1;                 
         else 
-            work_done <= 1'h0;
+            work_done_wr <= 1'h0;
+
+
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        work_done_rd <= 0;
+    else        
+        if ( (  cs == rd_0 ) && smpl_cnt == 16*112/8-1 )
+            work_done_rd <= 1;
+        else if (  cs == rd_1 ) && smpl_cnt == 16*56/8-1 )
+            work_done_rd <= 1;   
+        else if (  cs == rd_2 ) && smpl_cnt == 32*28/8-1 )
+            work_done_rd <= 1;        
+        else if (  cs == rd_3 ) && smpl_cnt == 64*14/8-1 )
+            work_done_rd <= 1;  
+        else if (  cs == rd_4 ) && smpl_cnt == 128*7/8-1 )
+            work_done_rd <= 1;   
+        else if (  cs == rd_5 ) && smpl_cnt == 256*1/8-1 )
+            work_done_rd <= 1;                 
+        else 
+            work_done_rd <= 1'h0;
 
 assign res_rd[0] = ( cs == wr_0 ) && ( smpl_cnt != 0 ) && avl_waitrequest ? 1'h1 : 1'h0;
 assign res_rd[1] = ( cs == wr_1 ) && ( smpl_cnt != 0 ) && avl_waitrequest ? 1'h1 : 1'h0;
