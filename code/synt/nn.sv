@@ -164,20 +164,20 @@ deconv_nn_inst
 
 concat_FSM concat_FSM_inst              
 (
-	.clk                         ( clk             ),
-    .reset_n                     ( reset_n         ),
-    .req_wr                      ( ddr_fifo_afull  ),
-    .req_rd                      ( ddr_fifo_aempty ),
-    .res_rd                      ( ddr_fifo_rd     ),
+	.clk                    ( clk                       ),
+    .reset_n                ( reset_n                   ),
+    .req_wr                 ( ddr_fifo_afull            ),
+    .req_rd                 ( ddr_fifo_aempty           ),
+    .res_rd                 ( ddr_fifo_rd               ),
 
 //avalon
 	.avl_beginbursttransfer (   avl_beginbursttransfer  ),  // mm_interconnect_0:if0_avl_0_beginbursttransfer -> if0:avl_burstbegin_0
-	//avl_readdata          (),  // if0:avl_rdata_0 -> mm_interconnect_0:if0_avl_0_readdata
+//	.avl_readdata           (                           ),  // if0:avl_rdata_0 -> mm_interconnect_0:if0_avl_0_readdata
 	.avl_waitrequest        ( avl_waitrequest           ), // if0:avl_ready_0 -> mm_interconnect_0:if0_avl_0_waitrequest
 	.avl_address            ( avl_address               ), // mm_interconnect_0:if0_avl_0_address -> if0:avl_addr_0
-	//.avl_read             (),   // mm_interconnect_0:if0_avl_0_read -> if0:avl_read_req_0
+	.avl_read               ( avl_read                  ),   // mm_interconnect_0:if0_avl_0_read -> if0:avl_read_req_0
 	//.avl_byteenable       (),   // mm_interconnect_0:if0_avl_0_byteenable -> if0:avl_be_0
-	//.avl_readdatavalid    (),   // if0:avl_rdata_valid_0 -> mm_interconnect_0:if0_avl_0_readdatavalid
+//	.avl_readdatavalid      ( avl_readdatavalid         ),   // if0:avl_rdata_valid_0 -> mm_interconnect_0:if0_avl_0_readdatavalid
 	.avl_write              ( avl_write                 ), // mm_interconnect_0:if0_avl_0_write -> if0:avl_write_req_0
 	//.avl_writedata        (),   // mm_interconnect_0:if0_avl_0_writedata -> if0:avl_wdata_0
 	.avl_burstcount         ( avl_burstcount            )// mm_interconnect_0:if0_avl_0_burstcount -> if0:avl_size_0    
@@ -187,7 +187,7 @@ concat_FSM concat_FSM_inst
 ////debug 
 
  assign avl_writedata = 64'hADCD_EF00_DEAD_CAFE;
- assign avl_read = 0;
+// assign avl_read = 0;
 	wire        afi_clk;                  //      afi_clk.clk
 //	wire        afi_half_clk;             // afi_half_clk.clk
 	wire        afi_reset_n;              //    afi_reset.reset_n
