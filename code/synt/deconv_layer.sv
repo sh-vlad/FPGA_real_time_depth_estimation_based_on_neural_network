@@ -354,9 +354,9 @@ always @( posedge clk or negedge reset_n )
     if ( !reset_n )
         ddr_fifo_aempty <= 1'h0;
     else
-        ddr_fifo_aempty <= ( rdusedw < (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) && concat ? 1'h1: 1'h0;
+        ddr_fifo_aempty <= ( rdusedw < (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) /*&& concat */? 1'h1: 1'h0;
 
-
+/*
 `ifdef SYNT
 `else
     always @(posedge clk)   
@@ -364,5 +364,6 @@ always @( posedge clk or negedge reset_n )
             assert ( !(eof_o&&concat) ) else begin $error("eof_o&&concat!!!"); $stop; end; 
         end
 `endif              
+*/
 endmodule
 

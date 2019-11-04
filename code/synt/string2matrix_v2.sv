@@ -384,6 +384,7 @@ sh_reg_1
     //output logic					eop_o,
     //output logic					sof_o,
     //output logic					eof_o 
+    
 `ifdef SYNT
 `else
     always @(posedge clk)   
@@ -393,5 +394,6 @@ sh_reg_1
             assert ( !fifo_full[2] ) else begin $error("FIFO 2 FULL!!!"); $stop; end; 
         end
 `endif            
+
 endmodule
 

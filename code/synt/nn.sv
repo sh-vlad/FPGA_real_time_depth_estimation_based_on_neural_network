@@ -5,9 +5,8 @@ module nn
     parameter DATA_WIDTH    = 8
 )
 (
-    input wire                                  clk_50,
+    input wire                                  clk,
     
-	//output wire                                  clk, 
     input wire                                  reset_n,
 	input wire [DATA_WIDTH-1:0]                 data_i/*[STRING2MATRIX_CHAN_NUM]*/, 
     input wire                                  data_valid_i,    
@@ -24,7 +23,7 @@ module nn
     output logic					            eof_o                                                        
 );
 wire afi_half_clk;
-wire clk = afi_half_clk;
+
 
 wire [7:0]                        data_to7                ;
 wire                              data_valid_to7          ;   
@@ -50,6 +49,20 @@ wire                              eof               ;
 wire [5:0]                        ddr_fifo_rd;
 wire [5:0]                        ddr_fifo_afull;  
 wire [5:0]                        ddr_fifo_aempty;
+
+//
+	wire         avl_beginbursttransfer; // mm_interconnect_0:if0_avl_0_beginbursttransfer -> if0:avl_burstbegin_0
+	wire  [63:0] avl_readdata;           // if0:avl_rdata_0 -> mm_interconnect_0:if0_avl_0_readdata
+	wire         avl_waitrequest;        // if0:avl_ready_0 -> mm_interconnect_0:if0_avl_0_waitrequest
+	wire  [26:0] avl_address;            // mm_interconnect_0:if0_avl_0_address -> if0:avl_addr_0
+	wire         avl_read;               // mm_interconnect_0:if0_avl_0_read -> if0:avl_read_req_0
+	wire   [7:0] avl_byteenable;         // mm_interconnect_0:if0_avl_0_byteenable -> if0:avl_be_0
+	wire         avl_readdatavalid;      // if0:avl_rdata_valid_0 -> mm_interconnect_0:if0_avl_0_readdatavalid
+	wire         avl_write;              // mm_interconnect_0:if0_avl_0_write -> if0:avl_write_req_0
+	wire  [63:0] avl_writedata;          // mm_interconnect_0:if0_avl_0_writedata -> if0:avl_wdata_0
+	wire   [7:0] avl_burstcount;         // mm_interconnect_0:if0_avl_0_burstcount -> if0:avl_size_0
+
+//
 conv_nn                          
 #(                               
     .DATA_WIDTH    ( 8 )         
@@ -144,23 +157,14 @@ deconv_nn_inst
     .sof_o                       ( sof_o           ),
     .eof_o                       ( eof_o           ),
     
-    .ddr_data                    (),
-    .ddr_data_valid              (),
+    .ddr_data                    (avl_readdata),
+    .ddr_data_valid              (avl_readdatavalid),
     .ddr_fifo_aempty             ( ddr_fifo_aempty  )
     
 ); 
 
 
-	wire         avl_beginbursttransfer; // mm_interconnect_0:if0_avl_0_beginbursttransfer -> if0:avl_burstbegin_0
-	wire  [63:0] avl_readdata;           // if0:avl_rdata_0 -> mm_interconnect_0:if0_avl_0_readdata
-	wire         avl_waitrequest;        // if0:avl_ready_0 -> mm_interconnect_0:if0_avl_0_waitrequest
-	wire  [26:0] avl_address;            // mm_interconnect_0:if0_avl_0_address -> if0:avl_addr_0
-	wire         avl_read;               // mm_interconnect_0:if0_avl_0_read -> if0:avl_read_req_0
-	wire   [7:0] avl_byteenable;         // mm_interconnect_0:if0_avl_0_byteenable -> if0:avl_be_0
-	wire         avl_readdatavalid;      // if0:avl_rdata_valid_0 -> mm_interconnect_0:if0_avl_0_readdatavalid
-	wire         avl_write;              // mm_interconnect_0:if0_avl_0_write -> if0:avl_write_req_0
-	wire  [63:0] avl_writedata;          // mm_interconnect_0:if0_avl_0_writedata -> if0:avl_wdata_0
-	wire   [7:0] avl_burstcount;         // mm_interconnect_0:if0_avl_0_burstcount -> if0:avl_size_0
+
 
 concat_FSM concat_FSM_inst              
 (
@@ -246,7 +250,7 @@ concat_FSM concat_FSM_inst
 	);    
  */   
 DDR3_example_sim_e0_if0 if0 (
-		.pll_ref_clk                ( clk_50                    ),                                    //        pll_ref_clk.clk
+		.pll_ref_clk                ( clk                    ),                                    //        pll_ref_clk.clk
 		.global_reset_n             ( reset_n            ),                                 //       global_reset.reset_n
 		.soft_reset_n               ( reset_n              ),                                   //         soft_reset.reset_n
 		.afi_clk                    ( afi_clk                   ),                                        //            afi_clk.clk
@@ -278,11 +282,11 @@ DDR3_example_sim_e0_if0 if0 (
 		.avl_read_req_0             ( avl_read                  ),                            //                   .read
 		.avl_write_req_0            ( avl_write                 ),                          //                   .write
 		.avl_size_0                 ( avl_burstcount            ),                //                   .burstcount
-		.mp_cmd_clk_0_clk           ( clk_50                              ),                               //       mp_cmd_clk_0.clk
+		.mp_cmd_clk_0_clk           ( clk                              ),                               //       mp_cmd_clk_0.clk
 		.mp_cmd_reset_n_0_reset_n   ( reset_n                ),                //   mp_cmd_reset_n_0.reset_n
-		.mp_rfifo_clk_0_clk         ( clk_50                               ),                               //     mp_rfifo_clk_0.clk
+		.mp_rfifo_clk_0_clk         ( clk                               ),                               //     mp_rfifo_clk_0.clk
 		.mp_rfifo_reset_n_0_reset_n ( reset_n            ),            // mp_rfifo_reset_n_0.reset_n
-		.mp_wfifo_clk_0_clk         ( clk_50                               ),                               //     mp_wfifo_clk_0.clk
+		.mp_wfifo_clk_0_clk         ( clk                               ),                               //     mp_wfifo_clk_0.clk
 		.mp_wfifo_reset_n_0_reset_n ( reset_n            ),            // mp_wfifo_reset_n_0.reset_n
 		.local_init_done            ( local_init_done                                ),                                //             status.local_init_done
 		.local_cal_success          ( local_cal_success                              ),                              //                   .local_cal_success
