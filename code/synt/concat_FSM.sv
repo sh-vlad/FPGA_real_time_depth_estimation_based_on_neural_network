@@ -310,17 +310,17 @@ always @( posedge clk or negedge reset_n )
     if ( !reset_n )
         work_done_wr <= 0;
     else        
-        if (  cs == wr_0   && smpl_cnt == 16*112/8-1 )
+        if ( ( cs == wr_0  ) && smpl_cnt == 16*112/8-1 )
             work_done_wr <= 1;
-        else if (  cs == wr_1   && smpl_cnt == 16*56/8-1 )
+        else if ( ( cs == wr_1  ) && smpl_cnt == 16*56/8-1 )
             work_done_wr <= 1;   
-        else if (  cs == wr_2   && smpl_cnt == 32*28/8-1 )
+        else if ( ( cs == wr_2  ) && smpl_cnt == 32*28/8-1 )
             work_done_wr <= 1;        
-        else if (  cs == wr_3   && smpl_cnt == 64*14/8-1 )
+        else if ( ( cs == wr_3  ) && smpl_cnt == 64*14/8-1 )
             work_done_wr <= 1;  
-        else if (  cs == wr_4   && smpl_cnt == 128*7/8-1 )
+        else if ( ( cs == wr_4  ) && smpl_cnt == 128*7/8-1 )
             work_done_wr <= 1;   
-        else if (  cs == wr_5   && smpl_cnt == 256*1/8-1 )
+        else if ( ( cs == wr_5  ) && smpl_cnt == 256*1/8-1 )
             work_done_wr <= 1;                 
         else 
             work_done_wr <= 1'h0;
