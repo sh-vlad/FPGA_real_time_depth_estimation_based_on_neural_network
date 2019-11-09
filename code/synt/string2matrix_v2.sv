@@ -60,6 +60,39 @@ module string2matrix_v2
     reg                                             sop_imp;
     reg     [ 5: 0]                                 eop_imp; 
     wire    [ 2: 0]                                 fifo_full;
+    
+    
+	reg		[$clog2(CHANNEL_NUM)-1:0]				padding_cnt;
+	reg		[3:0]									start;
+	reg												padding_wr;
+	always@ (posedge clk or negedge reset_n )
+		if ( !reset_n )
+			start <= '0;
+		else 
+			if ( start < 15 || eof_i )
+				start <= start + 1'h1;
+			
+		
+	always @( posedge clk or negedge reset_n )
+		if ( !reset_n )
+			padding_cnt <= '0;
+		else
+            if ( padding_cnt == CHANNEL_NUM )
+                padding_cnt <= '0;
+            else if ( start == 4'd14 )
+                padding_cnt <= 1;
+            else if ( padding_cnt != 0 )
+                padding_cnt <= padding_cnt + 1;
+
+    always @( posedge clk or negedge reset_n )
+		if ( !reset_n )
+            padding_wr <= 1'h0;
+        else
+            if ( padding_cnt != 0 )
+                padding_wr <= 1'h1;
+            else    
+                padding_wr <= 1'h0;
+	
     enum reg [3:0] 
     {
         s_idle      = 4'd1,
@@ -83,7 +116,12 @@ module string2matrix_v2
 //
 	always @( posedge clk )
 		begin
-			{fifo_in_t0[1],fifo_in_t0[0]} <= {fifo_in_t0[0],data_i};          
+		//	{fifo_in_t0[1],fifo_in_t0[0]} <= {fifo_in_t0[0],data_i};    
+            if ( padding_wr )
+                fifo_in_t0[0] <= '0;
+            else 
+                fifo_in_t0[0] <= data_i;
+                fifo_in_t0[1] <= fifo_in_t0[0];
 		end    
         
     always_comb    
@@ -92,7 +130,10 @@ module string2matrix_v2
             fifo_in_t1[1] = fifo_out[1];
         end        
 
-    assign {fifo_in[2],fifo_in[1],fifo_in[0]} = {fifo_in_t1[1],fifo_in_t1[0],fifo_in_t0[1]};
+//    assign {fifo_in[2],fifo_in[1],fifo_in[0]} = {fifo_in_t1[1],fifo_in_t1[0],fifo_in_t0[1]};
+	assign fifo_in[2] = fifo_in_t1[1];
+	assign fifo_in[1] = fifo_in_t1[0];
+	assign fifo_in[0] = padding_wr ? '0 : fifo_in_t0[1];
 //    
     always @( posedge clk )
         sh_eop <= eop_i;        
@@ -216,6 +257,11 @@ assign rd_flag = (hold_cnt == 2);
                         end
         endcase
 
+wire [ 2: 0] fifo_wr_;   
+
+assign fifo_wr_[0] = fifo_wr[0]|padding_wr;
+assign fifo_wr_[1] = fifo_wr[1];
+assign fifo_wr_[2] = fifo_wr[2];
 
     genvar j;        
     generate
@@ -232,19 +278,19 @@ assign rd_flag = (hold_cnt == 2);
                     )
                     scfifo_inst
                     (
-                        .clock          ( clk           ),
-                        .data           ( fifo_in[j]    ),
-                        .rdreq          ( fifo_rd[j]    ),
-                        .wrreq          ( fifo_wr[j]    ),
-                		.empty          ( fifo_empty[j] ),
-                		.full           ( fifo_full[j]  ),
-                        .q              ( fifo_out[j]   ),
-                		.usedw          ( fifo_usedw[j] ),
-                		.aclr           (               ),
-                		.almost_empty   (               ),
-                		.almost_full    (               ),
-                		.eccstatus      (               ),
-                		.sclr           ( !reset_n      )
+                        .clock          ( clk                       ),
+                        .data           ( fifo_in[j]                ),
+                        .rdreq          ( fifo_rd[j]                ),
+                        .wrreq          ( fifo_wr_[j]               ),
+                		.empty          ( fifo_empty[j]             ),
+                		.full           ( fifo_full[j]              ),
+                        .q              ( fifo_out[j]               ),
+                		.usedw          ( fifo_usedw[j]             ),
+                		.aclr           (                           ),
+                		.almost_empty   (                           ),
+                		.almost_full    (                           ),
+                		.eccstatus      (                           ),
+                		.sclr           ( !reset_n                  )
                     ); 
                 end
         end      
