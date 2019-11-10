@@ -65,11 +65,12 @@ module string2matrix_v2
 	reg		[$clog2(CHANNEL_NUM)-1:0]				padding_cnt;
 	reg		[3:0]									start;
 	reg												padding_wr;
+    reg                                             second_padding;
 	always@ (posedge clk or negedge reset_n )
 		if ( !reset_n )
 			start <= '0;
 		else 
-			if ( start < 15 || eof_i )
+			if ( start < 15 || eop_i || (second_padding && padding_cnt == CHANNEL_NUM) )
 				start <= start + 1'h1;
 			
 		
@@ -92,7 +93,16 @@ module string2matrix_v2
                 padding_wr <= 1'h1;
             else    
                 padding_wr <= 1'h0;
-	
+
+    always @( posedge clk or negedge reset_n )
+        if (! reset_n )
+            second_padding  <= 1'h0;
+        else
+            if ( eop_i )
+                second_padding <= 1'h1;
+            else if ( second_padding && padding_cnt == CHANNEL_NUM )
+                second_padding  <= 1'h0;	
+                
     enum reg [3:0] 
     {
         s_idle      = 4'd1,
@@ -133,7 +143,7 @@ module string2matrix_v2
 //    assign {fifo_in[2],fifo_in[1],fifo_in[0]} = {fifo_in_t1[1],fifo_in_t1[0],fifo_in_t0[1]};
 	assign fifo_in[2] = fifo_in_t1[1];
 	assign fifo_in[1] = fifo_in_t1[0];
-	assign fifo_in[0] = padding_wr ? '0 : fifo_in_t0[1];
+	assign fifo_in[0] = padding_wr ? /*8'hEB*/'0 : fifo_in_t0[1];
 //    
     always @( posedge clk )
         sh_eop <= eop_i;        
@@ -214,7 +224,7 @@ always_comb
         s_last_2:empty_flag = fifo_usedw[0] > /*STRING_LEN*CHANNEL_NUM*/0;
         s_last_1:empty_flag = fifo_usedw[1] > /*STRING_LEN*CHANNEL_NUM*/0;
         s_last_0:empty_flag = fifo_usedw[2] > /*STRING_LEN*CHANNEL_NUM*/0;
-        default: empty_flag = fifo_usedw[0] > STRING_LEN*CHANNEL_NUM;
+        default: empty_flag = fifo_usedw[0] > STRING_LEN*CHANNEL_NUM+CHANNEL_NUM*3;
     endcase
 assign rd_flag = (hold_cnt == 2);
     always @( posedge clk )
@@ -336,6 +346,7 @@ assign fifo_wr_[2] = fifo_wr[2];
 //  RAM test
 reg     [DATA_WIDTH-1:0]  sh_reg_test[MATRIX_SIZE**2-1:0];     
 wire    [DATA_WIDTH-1:0]  mem_out[MATRIX_SIZE**2-1:0];   
+
 always @ ( posedge clk )
     if ( sh_rd_flag[1] )
         begin
@@ -343,6 +354,24 @@ always @ ( posedge clk )
             sh_reg_test[5:3] <= mem_out[2:0];
             sh_reg_test[8:6] <= mem_out[5:3];
         end
+        
+/*
+always @ ( posedge clk )
+    if ( sh_rd_flag[1] )
+        begin
+            sh_reg_test[8] <= sh_reg_in[2];
+            sh_reg_test[7] <= sh_reg_in[1];
+            sh_reg_test[6] <= sh_reg_in[0];
+            
+            sh_reg_test[3] <= sh_reg_test[6];
+            sh_reg_test[4] <= sh_reg_test[7];
+            sh_reg_test[5] <= sh_reg_test[8];
+
+            sh_reg_test[0] <= sh_reg_test[3];
+            sh_reg_test[1] <= sh_reg_test[4];
+            sh_reg_test[2] <= sh_reg_test[5];            
+        end
+*/  
 genvar gen; 
 generate 
     for ( gen = 0; gen < 9; gen++)
@@ -371,11 +400,23 @@ sh_reg_1
     always @( posedge clk )
         case 
         */
+        
+reg valid_by_cnt;
+
+    always @( posedge clk or reset_n )
+        if ( !reset_n )
+            valid_by_cnt <= 1'h0;
+        else
+            if ( eop_imp[3] && out_cnt == 0 )
+                valid_by_cnt <= 1'h0;         
+            else if ( out_cnt > (CHANNEL_NUM*2) )
+                valid_by_cnt <= 1'h1;
+        
     always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             out_cnt <= '0;
         else
-            if ( ( out_cnt == CHANNEL_NUM*STRING_LEN-1 ) && hold_cnt == 4 )
+            if ( ( out_cnt == (CHANNEL_NUM*STRING_LEN+CHANNEL_NUM*2)-1 ) && hold_cnt == 4 )
                 out_cnt <= '0;
             else if ( hold_cnt == 4/*hold_cnt2wire[2]*/ /*& global_valid*/ )
                 out_cnt <= out_cnt + 1'h1;
@@ -384,18 +425,27 @@ sh_reg_1
     always @( posedge clk )
         if ( sh_rd_flag[2] )
             begin  
-            //    data_o <= sh_reg[sh_chan_cnt[1]];
-            data_o <= sh_reg_test;
+                //    data_o <= sh_reg[sh_chan_cnt[1]];
+                //data_o <= sh_reg_test;
+                data_o[0] <= sh_reg_test[8];
+                data_o[1] <= sh_reg_test[5];
+                data_o[2] <= sh_reg_test[2];
+                data_o[3] <= sh_reg_test[7];
+                data_o[4] <= sh_reg_test[4];
+                data_o[5] <= sh_reg_test[1];
+                data_o[6] <= sh_reg_test[6];
+                data_o[7] <= sh_reg_test[3];
+                data_o[8] <= sh_reg_test[0];
             end 
         
-    assign data_valid_o = hold_cnt2wire[4] & global_valid;   
+    assign data_valid_o = hold_cnt2wire[4] & global_valid & valid_by_cnt;   
     
     always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             sop_o <= 1'h0;
         else
             if ( ( sh_cs[6] >= s_first_2 && sh_cs[6] < s_last_0 ) && sop_imp )
-                sop_o <= out_cnt == 1;
+                sop_o <= out_cnt == CHANNEL_NUM*2+1 ;
             else    
                 sop_o <= 1'h0;
  
@@ -403,7 +453,7 @@ sh_reg_1
         if ( !reset_n )
             eop_o <= 1'h0;
         else
-            if ( ( sh_cs[6] >= s_first_2 && sh_cs[6] <= s_last_0 ) && eop_imp[3] )
+            if ( ( sh_cs[6] >= s_first_2 && sh_cs[6] <= s_last_0 ) && eop_imp[2] )
                 eop_o <= out_cnt == 0;
             else    
                 eop_o <= 1'h0;
@@ -413,7 +463,7 @@ sh_reg_1
             sof_o <= 1'h0;
         else
             if ( sh_cs[6] == s_first_2 && sop_imp )
-                sof_o <= out_cnt == 1;
+                sof_o <= out_cnt == CHANNEL_NUM*2+1;
             else
                 sof_o <= 1'h0;
 
@@ -421,7 +471,7 @@ sh_reg_1
         if ( !reset_n )
             eof_o <= 1'h0;
         else
-            if ( sh_cs[6] == s_last_0 && eop_imp[3] )
+            if ( sh_cs[6] == s_last_0 && eop_imp[2] )
                 eof_o <= out_cnt == 0;
             else
                 eof_o <= 1'h0;
@@ -433,12 +483,21 @@ sh_reg_1
     
 `ifdef SYNT
 `else
+int cnt_wr=0;
+int cnt_rd=0;
     always @(posedge clk)   
         begin
             assert ( !fifo_full[0] ) else begin $error("FIFO 0 FULL!!!"); $stop; end; 
             assert ( !fifo_full[1] ) else begin $error("FIFO 1 FULL!!!"); $stop; end; 
             assert ( !fifo_full[2] ) else begin $error("FIFO 2 FULL!!!"); $stop; end; 
         end
+    
+always @(posedge fifo_wr_ )
+    cnt_wr = cnt_wr + 1;  
+    
+always @(posedge fifo_rd )
+    cnt_rd = cnt_rd + 1;      
+    
 `endif            
 
 endmodule

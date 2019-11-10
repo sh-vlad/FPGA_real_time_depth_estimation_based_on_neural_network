@@ -29,10 +29,10 @@ module conv_vect_ser
 );
 localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
 localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
-localparam MEM_DEPTH = CHANNEL_NUM;
+localparam MEM_DEPTH = CHANNEL_NUM*MTRX_NUM;
 reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult;
 reg [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum[CHANNEL_NUM];
-reg [$clog2(CHANNEL_NUM)-1:0]               rom_addr;    
+reg [$clog2(CHANNEL_NUM*MTRX_NUM)-1:0]      rom_addr;    
 reg [$clog2(MTRX_NUM)-1:0]                  mtrx_cnt;
 wire [KERNEL_WIDTH-1:0]                     kernel;
 reg [KERNEL_WIDTH-1:0]                      sh_kernel;
@@ -76,7 +76,7 @@ always @( posedge clk or negedge reset_n )
     if ( !reset_n )
         rom_addr <= '0;
     else
-        if ( rom_addr == CHANNEL_NUM-1 )
+        if ( rom_addr == (CHANNEL_NUM*MTRX_NUM)-1 )
             rom_addr <= '0;
         else if ( valid_i )
             rom_addr <= rom_addr + 1'h1;

@@ -347,7 +347,7 @@ always @( posedge clk or negedge reset_n )
         ddr_fifo_afull <= 1'h0;
     else
         ddr_fifo_afull <= ( wrusedw >= (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
-        
+        /*
 `ifdef SYNT
 `else
     always @(posedge clk)   
@@ -355,6 +355,6 @@ always @( posedge clk or negedge reset_n )
             assert ( !wrfull ) else begin $error("conv_layer FIFO 0 FULL!!!"); $stop; end; 
         end
 `endif            
-        
+        */
 endmodule
 
