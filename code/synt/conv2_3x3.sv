@@ -8,11 +8,11 @@ module conv2_3x3
     parameter DATAO_WIDTH = MULT_WIDTH + 8
 )
 (
-    input wire                          clk,
-    input logic     [DATA_WIDTH-1:0]    data_i[9],
+    input wire                                  clk,
+    input logic  signed     [DATA_WIDTH-1:0]    data_i[9],
 //    input logic     [KERNEL_WIDTH*9-1:0]  kernel_,	
-    input logic     [KERNEL_WIDTH-1:0]  kernel[9],
-    output logic    [DATAO_WIDTH-1:0]    data_o
+    input logic   signed    [KERNEL_WIDTH-1:0]  kernel[9],
+    output logic  signed    [DATAO_WIDTH-1:0]   data_o
 );
 
     

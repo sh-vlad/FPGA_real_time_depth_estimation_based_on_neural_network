@@ -41,24 +41,24 @@ module conv_layer
     parameter RELU_MAX_DATA                     = 254   
 )
 (
-	input wire                                  clk, 
-    input wire                                  reset_n,
-	input wire [STRING2MATRIX_DATA_WIDTH-1:0]   data_i/*[STRING2MATRIX_CHAN_NUM]*/, 
-    input wire                                  data_valid_i,    
-    input wire						            sop_i,
-    input wire						            eop_i,
-    input wire						            sof_i,
-    input wire						            eof_i,   
+	input wire                                          clk, 
+    input wire                                          reset_n,
+	input wire signed [STRING2MATRIX_DATA_WIDTH-1:0]    data_i/*[STRING2MATRIX_CHAN_NUM]*/, 
+    input wire                                          data_valid_i,    
+    input wire						                    sop_i,
+    input wire						                    eop_i,
+    input wire						                    sof_i,
+    input wire						                    eof_i,   
 
-    output logic [STRING2MATRIX_DATA_WIDTH-1:0] data_o,
-    output logic                                data_valid_o,
-	output logic					            sop_o,
-    output logic					            eop_o,
-    output logic					            sof_o,
-    output logic					            eof_o,  
-    
-    input wire                                  ddr_fifo_rd,
-    output reg                                  ddr_fifo_afull                                                            
+    output logic signed [STRING2MATRIX_DATA_WIDTH-1:0]  data_o,
+    output logic                                        data_valid_o,
+	output logic					                    sop_o,
+    output logic					                    eop_o,
+    output logic					                    sof_o,
+    output logic					                    eof_o,  
+            
+    input wire                                          ddr_fifo_rd,
+    output reg                                          ddr_fifo_afull                                                            
 );
 
 /*
@@ -114,40 +114,40 @@ localparam CONV2_3X3_WRP_DATA_HOLD = STRING2MATRIX_HOLD_DATA;
 //wire                                data_ReLu_valid;
 
 //connectors wires
-wire [STRING2MATRIX_DATA_WIDTH-1:0] data_string2matrix/*[STRING2MATRIX_CHAN_NUM]*/[9];
-wire /*[STRING2MATRIX_CHAN_NUM-1: 0]*/  data_string2matrix_valid;
-wire            					sop_string2matrix;
-wire            					eop_string2matrix;
-wire            					sof_string2matrix;
-wire            					eof_string2matrix;
+wire signed [STRING2MATRIX_DATA_WIDTH-1:0]  data_string2matrix/*[STRING2MATRIX_CHAN_NUM]*/[9];
+wire /*[STRING2MATRIX_CHAN_NUM-1: 0]*/      data_string2matrix_valid;
+wire            					        sop_string2matrix;
+wire            					        eop_string2matrix;
+wire            					        sof_string2matrix;
+wire            					        eof_string2matrix;
 //
-wire [CONV_VECT_SER_DATA_WIDTH-1:0] data_conv2_wrp/*[CONV2_3X3_WRP_KERNEL_NUM]*/;
-wire                                data_conv2_wrp_valid;
-wire            					sop_conv2_wrp;
-wire            					eop_conv2_wrp;
-wire            					sof_conv2_wrp;
-wire            					eof_conv2_wrp;
+wire signed [CONV_VECT_SER_DATA_WIDTH-1:0] data_conv2_wrp/*[CONV2_3X3_WRP_KERNEL_NUM]*/;
+wire                                    data_conv2_wrp_valid;
+wire            					    sop_conv2_wrp;
+wire            					    eop_conv2_wrp;
+wire            					    sof_conv2_wrp;
+wire            					    eof_conv2_wrp;
 //
-wire [RELU_DATA_WIDTH-1:0] data_conv_vect_ser;
-wire                                data_conv_vect_ser_valid;
-wire            					sop_conv_vect_ser;
-wire            					eop_conv_vect_ser;
-wire            					sof_conv_vect_ser;
-wire            					eof_conv_vect_ser;
+wire signed [RELU_DATA_WIDTH-1:0]       data_conv_vect_ser;
+wire                                    data_conv_vect_ser_valid;
+wire            					    sop_conv_vect_ser;
+wire            					    eop_conv_vect_ser;
+wire            					    sof_conv_vect_ser;
+wire            					    eof_conv_vect_ser;
 //
-wire [MAX_POOL_DATA_WIDTH-1:0]      data_ReLu;
-wire                                data_ReLu_valid;
-wire            					sop_ReLu;
-wire            					eop_ReLu;
-wire            					sof_ReLu;
-wire            					eof_ReLu;
+wire signed [MAX_POOL_DATA_WIDTH-1:0]   data_ReLu;
+wire                                    data_ReLu_valid;
+wire            					    sop_ReLu;
+wire            					    eop_ReLu;
+wire            					    sof_ReLu;
+wire            					    eof_ReLu;
 //
-wire [MAX_POOL_DATA_WIDTH-1:0]      data_max_pool;
-wire                                data_max_pool_valid;
-wire            					sop_max_pool;
-wire            					eop_max_pool;
-wire            					sof_max_pool;
-wire            					eof_max_pool;
+wire signed [MAX_POOL_DATA_WIDTH-1:0]   data_max_pool;
+wire                                    data_max_pool_valid;
+wire            					    sop_max_pool;
+wire            					    eop_max_pool;
+wire            					    sof_max_pool;
+wire            					    eof_max_pool;
 //
 // convert string to matrix
 string2matrix_v2

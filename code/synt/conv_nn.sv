@@ -10,13 +10,13 @@ module conv_nn
 	input wire                                  clk, 
     input wire                                  reset_n,
     input wire                                  data_valid_i,    
-	input wire [DATA_WIDTH-1:0]                 data_i,    
+	input wire signed [DATA_WIDTH-1:0]          data_i,    
     input wire						            sop_i,
     input wire						            eop_i,
     input wire						            sof_i,
     input wire						            eof_i,   
 
-    output wire [DATA_WIDTH-1:0]                data_o,
+    output wire signed [DATA_WIDTH-1:0]         data_o,
     output wire                                 data_valid_o,
 	output logic					            sop_o,
     output logic					            eop_o,
@@ -27,47 +27,47 @@ module conv_nn
     output reg [5:0]                            ddr_fifo_afull       
 );
 // 
-wire [DATA_WIDTH-1:0]   data_o_l0      ;
-wire                    data_valid_o_l0;   
-wire					sop_o_l0       ;
-wire					eop_o_l0       ;
-wire					sof_o_l0       ;
-wire					eof_o_l0       ;
+wire signed [DATA_WIDTH-1:0]    data_o_l0      ;
+wire                            data_valid_o_l0;   
+wire					        sop_o_l0       ;
+wire					        eop_o_l0       ;
+wire					        sof_o_l0       ;
+wire					        eof_o_l0       ;
 // 
-wire [DATA_WIDTH-1:0]   data_o_l1      ;
-wire                    data_valid_o_l1;   
-wire					sop_o_l1       ;
-wire					eop_o_l1       ;
-wire					sof_o_l1       ;
-wire					eof_o_l1       ;
+wire signed[DATA_WIDTH-1:0]     data_o_l1      ;
+wire                            data_valid_o_l1;   
+wire					        sop_o_l1       ;
+wire					        eop_o_l1       ;
+wire					        sof_o_l1       ;
+wire					        eof_o_l1       ;
 //
-wire [DATA_WIDTH-1:0]   data_o_l2      ;
-wire                    data_valid_o_l2;   
-wire					sop_o_l2       ;
-wire					eop_o_l2       ;
-wire					sof_o_l2       ;
-wire					eof_o_l2       ;
+wire signed[DATA_WIDTH-1:0]     data_o_l2      ;
+wire                            data_valid_o_l2;   
+wire					        sop_o_l2       ;
+wire					        eop_o_l2       ;
+wire					        sof_o_l2       ;
+wire					        eof_o_l2       ;
 //
-wire [DATA_WIDTH-1:0]   data_o_l3      ;
-wire                    data_valid_o_l3;   
-wire					sop_o_l3       ;
-wire					eop_o_l3       ;
-wire					sof_o_l3       ;
-wire					eof_o_l3       ;
+wire signed[DATA_WIDTH-1:0]     data_o_l3      ;
+wire                            data_valid_o_l3;   
+wire					        sop_o_l3       ;
+wire					        eop_o_l3       ;
+wire					        sof_o_l3       ;
+wire					        eof_o_l3       ;
 //
-wire [DATA_WIDTH-1:0]   data_o_l4      ;
-wire                    data_valid_o_l4;   
-wire					sop_o_l4       ;
-wire					eop_o_l4       ;
-wire					sof_o_l4       ;
-wire					eof_o_l4       ;
+wire signed[DATA_WIDTH-1:0]     data_o_l4      ;
+wire                            data_valid_o_l4;   
+wire					        sop_o_l4       ;
+wire					        eop_o_l4       ;
+wire					        sof_o_l4       ;
+wire					        eof_o_l4       ;
 //
-wire [DATA_WIDTH-1:0]   data_o_l5      ;
-wire                    data_valid_o_l5;   
-wire					sop_o_l5       ;
-wire					eop_o_l5       ;
-wire					sof_o_l5       ;
-wire					eof_o_l5       ;
+wire signed[DATA_WIDTH-1:0]     data_o_l5      ;
+wire                            data_valid_o_l5;   
+wire					        sop_o_l5       ;
+wire					        eop_o_l5       ;
+wire					        sof_o_l5       ;
+wire					        eof_o_l5       ;
 conv_layer
 #(
 

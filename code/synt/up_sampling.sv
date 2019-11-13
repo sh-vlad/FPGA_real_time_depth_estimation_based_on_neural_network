@@ -16,7 +16,7 @@ module up_sampling
     input wire                                  eop_i,
     input wire                                  sof_i,
     input wire                                  eof_i,
-    output logic            [DATA_O_WIDTH-1:0]  data_o,
+    output logic  signed    [DATA_O_WIDTH-1:0]  data_o,
     output logic                                data_valid_o,
     output logic                                sop_o,
     output logic                                eop_o,
@@ -39,18 +39,18 @@ reg  [$clog2(FIFO_DEPTH_LONG):0]         chan_str_cnt;
 logic                                    fifo_short_rd;
 logic[ 1: 0]                             sh_fifo_short_rd;
 reg  [$clog2(CHANNEL_NUM):0]             fifo_short_rd_cnt;
-wire [DATA_WIDTH-1:0]                    fifo_short_out;
+wire  signed[DATA_WIDTH-1:0]                    fifo_short_out;
 
-logic[DATA_WIDTH-1:0]                    fifo_long_in;
+logic  signed[DATA_WIDTH-1:0]                    fifo_long_in;
 logic                                    fifo_long_rd;
 reg                                      sh_fifo_long_rd;
 wire                                     fifo_long_empty;
 reg                                      sh_fifo_long_empty;
 wire                                     fifo_long_almost_empty;
-wire [DATA_O_WIDTH-1:0]                  fifo_long_out;
+wire  signed[DATA_O_WIDTH-1:0]                  fifo_long_out;
 wire [LPM_WIDTHU_LONG-1:0]               fifo_long_usedw;
 
-logic[DATA_WIDTH-1:0]                    fifo_input_out;
+logic  signed[DATA_WIDTH-1:0]                    fifo_input_out;
 logic                                    fifo_input_wr;
 wire [LPM_WIDTHU_INPUT-1:0]              fifo_input_usedw;
 wire                                     fifo_input_empty;

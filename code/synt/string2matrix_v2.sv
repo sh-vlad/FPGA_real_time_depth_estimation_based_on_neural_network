@@ -9,21 +9,21 @@ module string2matrix_v2
     parameter HOLD_DATA     = 16
 )
 (
-	input wire                      clk, 
-    input wire                      reset_n,
-    input wire                      data_valid_i,
-	input wire [DATA_WIDTH-1:0]     data_i,
-	input wire						sop_i,
-    input wire						eop_i,
-    input wire						sof_i,
-    input wire						eof_i,
+	input wire                              clk, 
+    input wire                              reset_n,
+    input wire                              data_valid_i,
+	input wire signed [DATA_WIDTH-1:0]      data_i,
+	input wire						        sop_i,
+    input wire						        eop_i,
+    input wire						        sof_i,
+    input wire						        eof_i,
     
-    output logic                    data_valid_o,   
-    output logic[DATA_WIDTH-1:0]    data_o[MATRIX_SIZE**2],
-	output logic					sop_o,
-    output logic					eop_o,
-    output logic					sof_o,
-    output logic					eof_o 
+    output logic                            data_valid_o,   
+    output logic signed[DATA_WIDTH-1:0]     data_o[MATRIX_SIZE**2],
+	output logic					        sop_o,
+    output logic					        eop_o,
+    output logic					        sof_o,
+    output logic					        eof_o 
     
 );
     localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
@@ -41,18 +41,18 @@ module string2matrix_v2
     reg     [HOLD_DATA_CNT_WIDTHU-1: 0]             hold_cnt;
     reg                                             sh_eop;
 //    wire                                            n_eop;
-    logic   [DATA_WIDTH-1:0]                        fifo_in[2:0];
-    logic   [DATA_WIDTH-1:0]                        fifo_in_t0[1:0];    
-    logic   [DATA_WIDTH-1:0]                        fifo_in_t1[1:0];       
-    wire    [DATA_WIDTH-1:0]                        fifo_out[2:0];
-    logic   [DATA_WIDTH-1:0]                        sh_reg_in[2:0];   
+    logic  signed   [DATA_WIDTH-1:0]                fifo_in[2:0];
+    logic  signed   [DATA_WIDTH-1:0]                fifo_in_t0[1:0];    
+    logic  signed   [DATA_WIDTH-1:0]                fifo_in_t1[1:0];       
+    wire   signed   [DATA_WIDTH-1:0]                fifo_out[2:0];
+    logic  signed   [DATA_WIDTH-1:0]                sh_reg_in[2:0];   
     logic                                           empty_flag;
     reg     [ 3: 0]                                 sh_rd_flag;
     logic                                           rd_flag; 
     wire    [LPM_WIDTHU-1:0]                        fifo_usedw[2:0];
     reg                                             sh_valid;
-    reg     [DATA_WIDTH-1:0]                        sh_reg[CHANNEL_NUM-1:0][MATRIX_SIZE**2-1:0];    
-    reg     [DATA_WIDTH-1:0]                        sh_reg_1[CHANNEL_NUM-1:0][MATRIX_SIZE**2-1:0];      
+    reg  signed     [DATA_WIDTH-1:0]                sh_reg[CHANNEL_NUM-1:0][MATRIX_SIZE**2-1:0];    
+    reg  signed     [DATA_WIDTH-1:0]                sh_reg_1[CHANNEL_NUM-1:0][MATRIX_SIZE**2-1:0];      
     reg                                             global_valid;
     reg     [5:0]                                   hold_cnt2wire;
     reg                                             eof;                                    
@@ -344,8 +344,8 @@ assign fifo_wr_[2] = fifo_wr[2];
 //                        end 
 
 //  RAM test
-reg     [DATA_WIDTH-1:0]  sh_reg_test[MATRIX_SIZE**2-1:0];     
-wire    [DATA_WIDTH-1:0]  mem_out[MATRIX_SIZE**2-1:0];   
+reg   signed   [DATA_WIDTH-1:0]  sh_reg_test[MATRIX_SIZE**2-1:0];     
+wire  signed   [DATA_WIDTH-1:0]  mem_out[MATRIX_SIZE**2-1:0];   
 
 always @ ( posedge clk )
     if ( sh_rd_flag[1] )

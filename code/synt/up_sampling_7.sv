@@ -16,7 +16,7 @@ module up_sampling_7
     input wire                                  eop_i,
     input wire                                  sof_i,
     input wire                                  eof_i,
-    output logic            [DATA_O_WIDTH-1:0]  data_o,
+    output logic  signed    [DATA_O_WIDTH-1:0]  data_o,
     output logic                                data_valid_o,
     output logic                                sop_o,
     output logic                                eop_o,

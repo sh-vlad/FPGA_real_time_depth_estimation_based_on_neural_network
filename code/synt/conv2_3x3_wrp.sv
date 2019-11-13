@@ -11,31 +11,31 @@ module conv2_3x3_wrp
     parameter DATAO_WIDTH = MULT_WIDTH + 8
 )
 (
-	input wire                          clk, 
-    input wire                          reset_n,
-	input wire [(DATA_WIDTH-1):0]       data_i/*[1]*/[9],
-    input wire                          data_valid_i,
-	input wire						    sop_i,
-    input wire						    eop_i,
-    input wire						    sof_i,
-    input wire						    eof_i,  
-    output wire [DATAO_WIDTH-1:0]       data_o/*[KERNEL_NUM]*/,
-    output wire                         data_valid_o,
-	output logic					    sop_o,
-    output logic					    eop_o,
-    output logic					    sof_o,
-    output logic					    eof_o     
+	input wire                              clk, 
+    input wire                              reset_n,
+	input wire  signed [(DATA_WIDTH-1):0]   data_i/*[1]*/[9],
+    input wire                              data_valid_i,
+	input wire						        sop_i,
+    input wire						        eop_i,
+    input wire						        sof_i,
+    input wire						        eof_i,  
+    output wire  signed [DATAO_WIDTH-1:0]   data_o/*[KERNEL_NUM]*/,
+    output wire                             data_valid_o,
+	output logic					        sop_o,
+    output logic					        eop_o,
+    output logic					        sof_o,
+    output logic					        eof_o     
 );
     localparam RAM_STYLE = MEM_DEPTH < 512 ? "logic" : "M10K";
     localparam ROM_ADDR_WIDTH = $clog2(MEM_DEPTH);
     localparam ROM_DATA_WIDTH = KERNEL_WIDTH*9;
 
     
-    wire    [KERNEL_WIDTH*9-1: 0]    rom_out/*[KERNEL_NUM]*/;
-    reg     [ROM_ADDR_WIDTH-1: 0]    rom_addr;    
-    logic   [KERNEL_WIDTH-1: 0]      kernel/*[KERNEL_NUM-1:0]*/[9];
-    reg     [(DATA_WIDTH-1):0]       sh_data_i[9];
-    reg     [31:0]                   hold_cnt;
+    wire        [KERNEL_WIDTH*9-1: 0]    rom_out/*[KERNEL_NUM]*/;
+    reg         [ROM_ADDR_WIDTH-1: 0]    rom_addr;    
+    logic signed[KERNEL_WIDTH-1: 0]      kernel/*[KERNEL_NUM-1:0]*/[9];
+    reg  signed [(DATA_WIDTH-1):0]       sh_data_i[9];
+    reg         [31:0]                   hold_cnt;
     
     always @( posedge clk )
         if ( hold_cnt == DATA_HOLD-1 || !data_valid_i )

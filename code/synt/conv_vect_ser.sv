@@ -11,48 +11,48 @@ module conv_vect_ser
     parameter STRING_LEN        = 224
 )
 (
-    input wire                                          clk,
-    input wire                                          reset_n,
-    input wire                                          sop_i,
-    input wire                                          eop_i,
-    input wire						                    sof_i,
-    input wire						                    eof_i, 
-	input wire                                          valid_i,
-    input logic     [DATA_WIDTH-1:0]                    data_i,
+    input wire                                                  clk,
+    input wire                                                  reset_n,
+    input wire                                                  sop_i,
+    input wire                                                  eop_i,
+    input wire						                            sof_i,
+    input wire						                            eof_i, 
+	input wire                                                  valid_i,
+    input logic  signed     [DATA_WIDTH-1:0]                    data_i,
 
-    output logic[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  data_o,
-    output logic                                        data_valid_o,
-    output logic                                        sop_o,
-    output logic                                        eop_o,
-    output logic					                    sof_o,
-    output logic					                    eof_o       
+    output logic  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  data_o,
+    output logic                                                data_valid_o,
+    output logic                                                sop_o,
+    output logic                                                eop_o,
+    output logic					                            sof_o,
+    output logic					                            eof_o       
 );
 localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
 localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
 localparam MEM_DEPTH = CHANNEL_NUM*MTRX_NUM;
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult;
-reg [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum[CHANNEL_NUM];
-reg [$clog2(CHANNEL_NUM*MTRX_NUM)-1:0]      rom_addr;    
-reg [$clog2(MTRX_NUM)-1:0]                  mtrx_cnt;
-wire [KERNEL_WIDTH-1:0]                     kernel;
-reg [KERNEL_WIDTH-1:0]                      sh_kernel;
-reg [DATA_WIDTH-1:0]                        sh_data[1:0];
-reg [$clog2(CHANNEL_NUM)-1:0]               sh_rom_addr[4:0];   
+reg  signed [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult;
+reg  signed [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum[CHANNEL_NUM];
+reg [$clog2(CHANNEL_NUM*MTRX_NUM)-1:0]              rom_addr;    
+reg [$clog2(MTRX_NUM)-1:0]                          mtrx_cnt;
+wire  signed [KERNEL_WIDTH-1:0]                     kernel;
+reg   signed[KERNEL_WIDTH-1:0]                      sh_kernel;
+reg  signed[DATA_WIDTH-1:0]                         sh_data[1:0];
+reg [$clog2(CHANNEL_NUM)-1:0]                       sh_rom_addr[4:0];   
 //reg [$clog2(HOLD_DATA):0]                   hold_data_cnt;
-reg [1:0]                                   hold_data_start;
-reg [2:0]                                   fifo_wr;
-wire                                        fifo_empty;
-reg                                         sh_fifo_empty;
-wire                                        n_fifo_empty;
-wire                                        fifo_rd;
-reg     [$clog2(STRING_LEN*CHANNEL_NUM)-1:0]out_cnt;
-reg                                         work;
-reg [3:0]                                   fifo_acc_wr;
-reg [2:0]                                   fifo_acc_rd;
-reg                                         sh_valid_i;
-reg [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  summ;
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           fifo_out;
-logic [KERNEL_WIDTH+DATA_WIDTH-1:0]         fifo_in;
+reg [1:0]                                           hold_data_start;
+reg [2:0]                                           fifo_wr;
+wire                                                fifo_empty;
+reg                                                 sh_fifo_empty;
+wire                                                n_fifo_empty;
+wire                                                fifo_rd;
+reg     [$clog2(STRING_LEN*CHANNEL_NUM)-1:0]        out_cnt;
+reg                                                 work;
+reg [3:0]                                           fifo_acc_wr;
+reg [2:0]                                           fifo_acc_rd;
+reg                                                 sh_valid_i;
+reg  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   summ;
+reg  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]            fifo_out;
+logic  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]          fifo_in;
 
 always @( posedge clk )
     sh_valid_i <= valid_i;
@@ -98,8 +98,8 @@ always @( posedge clk )
 //
 reg mtrx_cnt_zero_it;
 reg sh_mtrx_cnt_zero_it;
-reg [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum_it;  
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult_it[1:0];
+reg  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum_it;  
+reg  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]           mult_it[1:0];
 
 always @( posedge clk )
     begin
@@ -123,10 +123,10 @@ always @( posedge clk )
 //            accum[sh_rom_addr[2]] <= accum_it + mult_it[0];
             
 // RAM test   
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           ram_in; 
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           test_ram_in; 
-wire [KERNEL_WIDTH+DATA_WIDTH-1:0]          ram_out; 
-reg [KERNEL_WIDTH+DATA_WIDTH-1:0]           sh_ram_out; 
+reg   signed[KERNEL_WIDTH+DATA_WIDTH-1:0]           ram_in; 
+reg   signed[KERNEL_WIDTH+DATA_WIDTH-1:0]           test_ram_in; 
+wire  signed [KERNEL_WIDTH+DATA_WIDTH-1:0]          ram_out; 
+reg   signed[KERNEL_WIDTH+DATA_WIDTH-1:0]           sh_ram_out; 
 
 always @( posedge clk )
     sh_ram_out <= ram_out;

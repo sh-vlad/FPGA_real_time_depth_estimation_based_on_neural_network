@@ -8,21 +8,21 @@ module max_pool_7
     parameter STRING_LEN        = 4
 )
 (
-    input wire                          clk,
-    input wire                          reset_n,
-    input wire                          sop_i,
-    input wire                          eop_i,
-    input wire						    sof_i,
-    input wire						    eof_i,      
-	input wire                          valid_i,
-    input logic     [DATA_WIDTH-1:0]    data_i,
+    input wire                                  clk,
+    input wire                                  reset_n,
+    input wire                                  sop_i,
+    input wire                                  eop_i,
+    input wire						            sof_i,
+    input wire						            eof_i,      
+	input wire                                  valid_i,
+    input logic  signed     [DATA_WIDTH-1:0]    data_i,
 
-    output logic    [DATA_WIDTH-1:0]    data_o,
-    output logic                        data_valid_o,
-    output logic                        sop_o,
-    output logic                        eop_o,
-    output logic					    sof_o,
-    output logic					    eof_o      
+    output logic signed    [DATA_WIDTH-1:0]     data_o,
+    output logic                                data_valid_o,
+    output logic                                sop_o,
+    output logic                                eop_o,
+    output logic					            sof_o,
+    output logic					            eof_o      
 );
 localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
 localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
@@ -32,7 +32,7 @@ localparam LPM_WIDTHU = $clog2(FIFO_DEPTH);
 localparam FIFOE_DEPTH = (CHANNEL_NUM*STRING_LEN)/4;
 localparam LPME_WIDTHU = $clog2(FIFOE_DEPTH);
 
-reg [DATA_WIDTH-1:0]                    sh_data_i;
+reg  signed[DATA_WIDTH-1:0]             sh_data_i;
 reg [$clog2(CHANNEL_NUM):0]             chan_cnt;
 reg [$clog2(CHANNEL_NUM):0]             sh_chan_cnt[4];
 reg                                     row_mark;   
@@ -43,7 +43,7 @@ reg                                     sh_line_mark;
 //reg [DATA_WIDTH-1:0]                    max[CHANNEL_NUM];
 reg                                     fifo_wr;
 reg                                     fifo_rd;
-reg [DATA_WIDTH-1:0]                    fifo_out;
+reg  signed[DATA_WIDTH-1:0]             fifo_out;
 reg [$clog2(HOLD_DATA):0]               hold_data_cnt;
 
 reg                                     fifoe_wr;
@@ -167,15 +167,15 @@ always @( posedge clk )
         sh_line_mark    <= line_mark;
     end
 //
-reg [1:0]               row_line_mark_it;
-reg                     max_sh_data_it;
-reg                     fifo_sh_data_it;
-reg [1:0]               fifo_rd_it;
-reg [1:0]               fifo_wr_it;
-reg [DATA_WIDTH-1:0]    sh_data_i_it;
-reg [DATA_WIDTH-1:0]    fifo_out_it;
-reg [DATA_WIDTH-1:0]    max_it; 
-reg [DATA_WIDTH-1:0]    ram_out; 
+reg [1:0]                   row_line_mark_it;
+reg                         max_sh_data_it;
+reg                         fifo_sh_data_it;
+reg [1:0]                   fifo_rd_it;
+reg [1:0]                   fifo_wr_it;
+reg  signed[DATA_WIDTH-1:0] sh_data_i_it;
+reg  signed[DATA_WIDTH-1:0] fifo_out_it;
+reg  signed[DATA_WIDTH-1:0] max_it; 
+reg  signed[DATA_WIDTH-1:0] ram_out; 
 reg [1:0]data_valid_it;
 reg [1:0]sop_it;
 reg [1:0]eop_it; 
@@ -209,8 +209,8 @@ always @( posedge clk )
 //RAM test
 reg max_sh_data_it_ram;
 reg fifo_sh_data_it_ram;
-reg [3:0][DATA_WIDTH-1:0]    max_it_ram; 
-reg [2:0][DATA_WIDTH-1:0]    sh_ram_out;
+reg  signed[3:0][DATA_WIDTH-1:0]    max_it_ram; 
+reg  signed[2:0][DATA_WIDTH-1:0]    sh_ram_out;
 //reg                     max_sh_data_it_ram;
 
 always @( posedge clk or negedge reset_n )
@@ -322,7 +322,7 @@ always @( posedge clk )
     
 
 
-reg [DATA_WIDTH-1:0] data_o_test;
+reg  signed[DATA_WIDTH-1:0] data_o_test;
 
 always @( posedge clk or negedge reset_n )
     data_valid_it[0] <= valid_o_imp;

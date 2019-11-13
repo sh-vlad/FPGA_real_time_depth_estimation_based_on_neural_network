@@ -3,7 +3,7 @@
 module ReLu
 #(
     parameter DATA_WIDTH        = 8,
-    parameter MAX_DATA          = 255,
+    parameter  MAX_DATA          = 255,
     parameter DATA_O_WIDTH      = 8
 )
 (
@@ -16,7 +16,7 @@ module ReLu
     input wire						            sof_i,
     input wire						            eof_i, 
     
-    output logic            [DATA_O_WIDTH-1:0]  data_o,
+    output logic  signed   [DATA_O_WIDTH-1:0]  data_o,
     output logic                                data_valid_o,
     output logic                                sop_o,
     output logic                                eop_o,

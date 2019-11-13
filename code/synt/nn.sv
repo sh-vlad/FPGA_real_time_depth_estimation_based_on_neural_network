@@ -8,14 +8,14 @@ module nn
     input wire                                  clk,
     
     input wire                                  reset_n,
-	input wire [DATA_WIDTH-1:0]                 data_i/*[STRING2MATRIX_CHAN_NUM]*/, 
+	input wire signed  [DATA_WIDTH-1:0]          data_i/*[STRING2MATRIX_CHAN_NUM]*/, 
     input wire                                  data_valid_i,    
     input wire						            sop_i,
     input wire						            eop_i,
     input wire						            sof_i,
     input wire						            eof_i,   
 
-    output logic [DATA_WIDTH-1:0]               data_o,
+    output logic signed [DATA_WIDTH-1:0]        data_o,
     output logic                                data_valid_o,
 	output logic					            sop_o,
     output logic					            eop_o,
@@ -25,21 +25,21 @@ module nn
 wire afi_half_clk;
 
 
-wire [7:0]                        data_to7                ;
+wire signed [7:0]                 data_to7                ;
 wire                              data_valid_to7          ;   
 wire                              sop_to7                 ;
 wire                              eop_to7                 ;
 wire                              sof_to7                 ;
 wire                              eof_to7                 ;
 
-wire [7:0]                        data_from7              ;
+wire signed [7:0]                 data_from7              ;
 wire                              data_valid_from7        ;   
 wire                              sop_from7               ;
 wire                              eop_from7               ;
 wire                              sof_from7               ;
 wire                              eof_from7               ;
 
-wire [7:0]                        data              ;
+wire signed [7:0]                 data              ;
 wire                              data_valid        ;   
 wire                              sop               ;
 wire                              eop               ;
