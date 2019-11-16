@@ -8,7 +8,10 @@ module conv_vect_ser
     parameter MTRX_NUM          = 8,
 //    parameter HOLD_DATA         = 8,
     parameter INI_FILE          = "rom_init.txt",
-    parameter STRING_LEN        = 224
+    parameter STRING_LEN        = 224,
+    
+    parameter BIAS_NUM          = 16,
+    parameter BIAS_WIDTH        = 24
 )
 (
     input wire                                                  clk,
@@ -30,6 +33,7 @@ module conv_vect_ser
 localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
 localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
 localparam MEM_DEPTH = CHANNEL_NUM*MTRX_NUM;
+
 reg  signed [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult;
 reg  signed [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum[CHANNEL_NUM];
 reg [$clog2(CHANNEL_NUM*MTRX_NUM)-1:0]              rom_addr;    
@@ -332,8 +336,36 @@ reg [1:0]data_valid_it;
 reg [1:0]sop_it;
 reg [1:0]eop_it;
 
+reg [$clog2(BIAS_NUM)-1:0]  bias_addr;
+
+always_ff @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        bias_addr <= '0;
+    else
+        if ( bias_addr == BIAS_NUM-1)
+            bias_addr <= 0;
+        else if (data_valid_it[0])
+            bias_addr <= bias_addr + 1'h1;
+
+wire signed [BIAS_WIDTH-1:0] bias;            
+ROM 
+#(
+   .DATA_WIDTH    ( BIAS_WIDTH      ),
+   .MEM_DEPTH     ( BIAS_NUM        ),
+   .RAM_STYLE     ( "M10K"          ),
+   .INI_FILE      ( "bias_0.txt"/*INI_FILE*/        )
+)
+ROM_bias_init
+(
+    .clk          ( clk             ), 
+    .addr         ( bias_addr       ),
+    .q            ( bias                )
+);
+
+
+
 always @( posedge clk )
-    data_o <= test_ram_in;
+    data_o <= test_ram_in + bias;
 //    data_o <= accum[sh_rom_addr[3]];
            
 always @( posedge clk or negedge reset_n ) 
@@ -382,6 +414,12 @@ always @( posedge clk )
         sof_o <= sop_o & !work;
         eof_o <= eop_o & !work;
     end        
+    
+    /*
+    initial
+        @(posedge reset_n )
+            $display("aaaaaaaaaaaaaaaaaaaaaaaaaaaa",INI_FILE);
+    */
 endmodule
 
 //    output logic  sop_o,

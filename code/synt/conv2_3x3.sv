@@ -17,11 +17,11 @@ module conv2_3x3
 
     
     
-	reg [MULT_WIDTH-1:0]    mult[9];
-    reg [MULT_WIDTH:0]      add_st0[5];
-    reg [MULT_WIDTH+1:0]    add_st1[3];
-    reg [MULT_WIDTH+4:0]    add_st2[2];    
-    reg [MULT_WIDTH+8:0]    add_st3;  
+	reg signed[MULT_WIDTH-1:0]    mult[9];
+    reg signed[MULT_WIDTH:0]      add_st0[5];
+    reg signed[MULT_WIDTH+1:0]    add_st1[3];
+    reg signed[MULT_WIDTH+4:0]    add_st2[2];    
+    reg signed[MULT_WIDTH+8:0]    add_st3;  
     
 //    wire[KERNEL_WIDTH-1:0]  kernel[9];    
 //   always_comb   

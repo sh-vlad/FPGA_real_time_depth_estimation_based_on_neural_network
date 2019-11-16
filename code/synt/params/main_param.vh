@@ -11,13 +11,13 @@ parameter  integer STRING2MATRIX_HOLD_DATA   [6]        = '{16 ,     16,     32,
 //parameter CONV2_3X3_WRP_KERNEL_NUM         [1:0] = 1             ;
 parameter  integer CONV2_3X3_WRP_KERNEL_WIDTH[6]        = '{8,       8,      8,      8,      8,      8};
 parameter  integer CONV2_3X3_WRP_MEM_DEPTH[6]           = '{3,       16,     16,     32,     64,     128};
-parameter string CONV2_3X3_INI_FILE [6]        = '{"rom_init_0.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt"};          
+parameter string CONV2_3X3_INI_FILE [6]        = '{"conv20.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt","rom_init_0.txt"};          
                                            
 parameter  integer CONV_VECT_SER_KERNEL_WIDTH[6]        = '{8 ,      8,      8,      8,      8,      8};
 parameter  integer CONV_VECT_SER_CHANNEL_NUM[6]         = '{16,      16,     32,     64,     128,    256};
 parameter  integer CONV_VECT_SER_MTRX_NUM[6]            = '{3 ,      16,     16,     32,     64,     128};
 //parameter CONV_VECT_SER_HOLD_DATA          [1:0] = 8              ;
-parameter string CONV_VECT_SER_INI_FILE[6]     = '{"rom_init.txt","rom_init.txt","rom_init.txt","rom_init.txt","rom_init.txt","rom_init.txt"} ;
+parameter string CONV_VECT_SER_INI_FILE[6]     = '{"conv_vect0.txt","rom_init.txt","rom_init.txt","rom_init.txt","rom_init.txt","rom_init.txt"} ;
                                        
 parameter  integer MAX_POOL_CHANNEL_NUM[6]              = '{16 ,     16,     32,     64,     128,    256};
 parameter  integer MAX_POOL_HOLD_DATA[6]                = '{16 ,     32,     32,     64,     128,    256};
