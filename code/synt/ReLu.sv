@@ -3,7 +3,7 @@
 module ReLu
 #(
     parameter DATA_WIDTH        = 8,
-    parameter  MAX_DATA          = 255,
+    parameter  MAX_DATA         = 255,
     parameter DATA_O_WIDTH      = 8
 )
 (
@@ -24,14 +24,19 @@ module ReLu
     output logic					            eof_o     
 );
 
+int test;
+
+wire signed [DATA_WIDTH-14:0]  data_tmp;
+
+assign data_tmp = data_i[DATA_WIDTH-1:13];
 
 always @( posedge clk )
-    if ( data_i > MAX_DATA )
-        data_o <= {(DATA_O_WIDTH){1'h1}};//MAX_DATA;
-    else if ( data_i < 0 )
+    if ( data_tmp > MAX_DATA )
+        data_o <= MAX_DATA;
+    else if ( data_tmp < 0 )
         data_o <= 0;
     else
-        data_o <= data_i;
+        data_o <= data_tmp;
         
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )

@@ -68,6 +68,52 @@ wire					        sop_o_l5       ;
 wire					        eop_o_l5       ;
 wire					        sof_o_l5       ;
 wire					        eof_o_l5       ;
+
+conv_layer
+#(
+
+    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[0]      ),      
+    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[0]      ),
+    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[0]     ),
+    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[0]     ),
+    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[0]       ),
+    
+    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[0]    ),
+    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[0]       ),
+    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[0]            ), 
+    
+    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[0]    ),
+    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
+    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
+    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[0]        ),
+    
+    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
+    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[0]            ),
+    
+    .RELU_MAX_DATA                    ( RELU_MAX_DATA[0]                 ),
+    
+    .CANCAT                           ( 0                                ),
+)
+conv_layer_99
+(
+	.clk                              ( clk                     ),      
+    .reset_n                          ( reset_n                 ),
+	.data_i                           ( data_i                  ),    
+    .data_valid_i                     ( data_valid_i            ),    
+    .sop_i                            ( sop_i                   ),
+    .eop_i                            ( eop_i                   ),
+    .sof_i                            ( sof_i                   ),
+    .eof_i                            ( eof_i                   ),
+    .data_o                           ( data_o_l0               ),
+    .data_valid_o                     ( data_valid_o_l0         ),
+	.sop_o                            ( sop_o_l0                ),
+    .eop_o                            ( eop_o_l0                ),
+    .sof_o                            ( sof_o_l0                ),
+    .eof_o                            ( eof_o_l0                ),
+    .ddr_fifo_rd                      ( ddr_fifo_rd[0]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[0]       )
+);
+//
 conv_layer
 #(
 

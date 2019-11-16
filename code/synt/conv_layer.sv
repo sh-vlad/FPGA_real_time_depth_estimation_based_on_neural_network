@@ -2,7 +2,8 @@
 //e-mail: shvladspb@gmail.com
 module conv_layer
 #(
-    parameter MAX_POOL_OFF                      = 0,                                                    
+    parameter MAX_POOL_OFF                      = 0,  
+    parameter CANCAT                            = 1,
 /*
     parameter DATA_WIDTH    = 8,
     parameter CHAN_NUM      = 3
@@ -75,7 +76,7 @@ localparam MAX_POOL_DATA_WIDTH = RELU_DATA_WIDTH;
 */
 localparam CONV2_3X3_WRP_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH;
 localparam CONV_VECT_SER_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH+CONV2_3X3_WRP_KERNEL_WIDTH+8;
-localparam RELU_DATA_WIDTH =  CONV2_3X3_WRP_DATA_WIDTH+CONV_VECT_SER_KERNEL_WIDTH+CONV_VECT_SER_MTRX_NUM;
+localparam RELU_DATA_WIDTH =  CONV_VECT_SER_DATA_WIDTH/*CONV2_3X3_WRP_DATA_WIDTH*/+CONV_VECT_SER_KERNEL_WIDTH+CONV_VECT_SER_MTRX_NUM;
 localparam MAX_POOL_DATA_WIDTH = $clog2(RELU_DATA_WIDTH);
 
 
@@ -302,51 +303,58 @@ generate
             assign eof_o        = eof_ReLu        ;
         end
 endgenerate 
-/*
 
-*/
-wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] wrusedw;
-wire wrfull;
 
-dcfifo_mixed_widths
-#(
-    .intended_device_family     ( "Cyclone V"                                   ),
-    .lpm_numwords               ( STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM ),
-    .lpm_showahead              ( "OFF"                 ),
-    .lpm_type                   ( "dcfifo_mixed_widths" ),   
-    .lpm_width                  ( 8                     ),
-    .lpm_widthu                 ( $clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)),
-    .lpm_widthu_r               ( $clog2((STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/8)),
-    .lpm_width_r                ( 64                    ),
-    .overflow_checking          ( "ON"                  ),
-    .rdsync_delaypipe           ( 4                     ),
-    .underflow_checking         ( "ON"                  ),
-    .use_eab                    ( "ON"                  ),
-    .wrsync_delaypipe           ( 4                     )
-)    
-dcfifo_inst 
-(
-	.data           ( data_o                ),
-	.rdclk          ( clk                   ),
-	.rdreq          ( ddr_fifo_rd           ),
-	.wrclk          ( clk                   ),
-	.wrreq          ( data_valid_o          ),
-	.q              (),
-	.rdempty        (),
-	.rdusedw        (),
-	.wrfull         (wrfull),
-	.wrusedw        ( wrusedw               ),
-	.aclr           ( 1'h0),
-	.eccstatus      (),
-	.rdfull         (),
-	.wrempty        ()
-);
+generate
+    if ( CANCAT == 1 )
+        begin: cancat_gen
 
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        ddr_fifo_afull <= 1'h0;
-    else
-        ddr_fifo_afull <= ( wrusedw >= (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
+            wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] wrusedw;
+            wire wrfull;
+
+            dcfifo_mixed_widths
+            #(
+                .intended_device_family     ( "Cyclone V"                                   ),
+                .lpm_numwords               ( STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM ),
+                .lpm_showahead              ( "OFF"                 ),
+                .lpm_type                   ( "dcfifo_mixed_widths" ),   
+                .lpm_width                  ( 8                     ),
+                .lpm_widthu                 ( $clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)),
+                .lpm_widthu_r               ( $clog2((STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/8)),
+                .lpm_width_r                ( 64                    ),
+                .overflow_checking          ( "ON"                  ),
+                .rdsync_delaypipe           ( 4                     ),
+                .underflow_checking         ( "ON"                  ),
+                .use_eab                    ( "ON"                  ),
+                .wrsync_delaypipe           ( 4                     )
+            )    
+            dcfifo_inst 
+            (
+                .data           ( data_o                ),
+                .rdclk          ( clk                   ),
+                .rdreq          ( ddr_fifo_rd           ),
+                .wrclk          ( clk                   ),
+                .wrreq          ( data_valid_o          ),
+                .q              (),
+                .rdempty        (),
+                .rdusedw        (),
+                .wrfull         (wrfull),
+                .wrusedw        ( wrusedw               ),
+                .aclr           ( 1'h0),
+                .eccstatus      (),
+                .rdfull         (),
+                .wrempty        ()
+            );
+
+            always @( posedge clk or negedge reset_n )
+                if ( !reset_n )
+                    ddr_fifo_afull <= 1'h0;
+                else
+                    ddr_fifo_afull <= ( wrusedw >= (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
+        end
+endgenerate
+        
+        
         /*
 `ifdef SYNT
 `else

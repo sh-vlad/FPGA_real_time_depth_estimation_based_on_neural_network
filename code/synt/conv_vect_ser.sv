@@ -23,7 +23,7 @@ module conv_vect_ser
 	input wire                                                  valid_i,
     input logic  signed     [DATA_WIDTH-1:0]                    data_i,
 
-    output logic  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  data_o,
+    output logic signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   data_o,
     output logic                                                data_valid_o,
     output logic                                                sop_o,
     output logic                                                eop_o,

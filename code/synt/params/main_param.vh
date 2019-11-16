@@ -3,7 +3,7 @@
 //                                         [1:0]
 parameter  integer STRING2MATRIX_DATA_WIDTH  [6]        = '{8  ,     8,      8,      8,      8,      8} ;
 //parameter  logic[31:0]STRING2MATRIX_DATA_WIDTH[0:4]         = '{32'd8  ,     32'd8,      32'd8,      32'd8,      32'd8} ;
-parameter  integer STRING2MATRIX_STRING_LEN  [6]        = '{/*24*/224,     112,    56,     28,     14,     7};//{224,     112    };
+parameter  integer STRING2MATRIX_STRING_LEN  [6]        = '{224,     112,    56,     28,     14,     7};//{224,     112    };
 parameter  integer STRING2MATRIX_MATRIX_SIZE [6]        = '{3  ,     3,      3,      3,      3,      3};
 parameter  integer STRING2MATRIX_CHANNEL_NUM [6]        = '{3  ,     16,     16,     32,     64,     128};
 parameter  integer STRING2MATRIX_HOLD_DATA   [6]        = '{16 ,     16,     32,     64,     128,    256};
@@ -21,7 +21,7 @@ parameter string CONV_VECT_SER_INI_FILE[6]     = '{"conv_vect0.txt","rom_init.tx
                                        
 parameter  integer MAX_POOL_CHANNEL_NUM[6]              = '{16 ,     16,     32,     64,     128,    256};
 parameter  integer MAX_POOL_HOLD_DATA[6]                = '{16 ,     32,     32,     64,     128,    256};
-parameter  integer RELU_MAX_DATA[6]                     = '{65535,   65535,  65535,  65535,  65535,  65535}/*2541*/           ;
+parameter  integer RELU_MAX_DATA[6]                     = '{127,     127,    127,    127,    127,    127}/*2541*/           ;
 
 //
 //parameter MATRIX_PARALLEL2SERIAL_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH;
