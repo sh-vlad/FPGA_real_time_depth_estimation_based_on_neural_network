@@ -62,7 +62,7 @@ module string2matrix_v2
     wire    [ 2: 0]                                 fifo_full;
     
     
-	reg		[$clog2(CHANNEL_NUM)-1:0]				padding_cnt;
+	reg		[$clog2(CHANNEL_NUM):0]				padding_cnt;
 	reg		[3:0]									start;
 	reg												padding_wr;
     reg                                             second_padding;

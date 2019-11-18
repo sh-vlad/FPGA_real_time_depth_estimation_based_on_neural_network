@@ -11,7 +11,8 @@ module conv_vect_ser
     parameter STRING_LEN        = 224,
     
     parameter BIAS_NUM          = 16,
-    parameter BIAS_WIDTH        = 24
+    parameter BIAS_WIDTH        = 24,
+    parameter BIAS_INI_FILE     = "rom_init.txt"
 )
 (
     input wire                                                  clk,
@@ -353,7 +354,7 @@ ROM
    .DATA_WIDTH    ( BIAS_WIDTH      ),
    .MEM_DEPTH     ( BIAS_NUM        ),
    .RAM_STYLE     ( "M10K"          ),
-   .INI_FILE      ( "bias_0.txt"/*INI_FILE*/        )
+   .INI_FILE      ( BIAS_INI_FILE   )
 )
 ROM_bias_init
 (

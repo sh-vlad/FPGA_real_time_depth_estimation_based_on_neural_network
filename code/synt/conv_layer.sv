@@ -3,7 +3,7 @@
 module conv_layer
 #(
     parameter MAX_POOL_OFF                      = 0,  
-    parameter CANCAT                            = 1,
+    parameter CANCAT_OFF                        = 0,
 /*
     parameter DATA_WIDTH    = 8,
     parameter CHAN_NUM      = 3
@@ -33,6 +33,7 @@ module conv_layer
     parameter CONV_VECT_SER_MTRX_NUM            = 3,               
     parameter CONV_VECT_SER_HOLD_DATA           = 8,               
     parameter CONV_VECT_SER_INI_FILE            = "rom_init.txt",
+    parameter CONV_VECT_BIAS_INI_FILE           = "rom_init.txt",
 //
 //    parameter MAX_POOL_DATA_WIDTH               = 8, 
     parameter MAX_POOL_CHANNEL_NUM              = 3,
@@ -77,7 +78,7 @@ localparam MAX_POOL_DATA_WIDTH = RELU_DATA_WIDTH;
 localparam CONV2_3X3_WRP_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH;
 localparam CONV_VECT_SER_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH+CONV2_3X3_WRP_KERNEL_WIDTH+8;
 localparam RELU_DATA_WIDTH =  CONV_VECT_SER_DATA_WIDTH/*CONV2_3X3_WRP_DATA_WIDTH*/+CONV_VECT_SER_KERNEL_WIDTH+CONV_VECT_SER_MTRX_NUM;
-localparam MAX_POOL_DATA_WIDTH = $clog2(RELU_DATA_WIDTH);
+localparam MAX_POOL_DATA_WIDTH = 8;//$clog2(RELU_DATA_WIDTH);
 
 
 localparam MATRIX_PARALLEL2SERIAL_DATA_HOLD = CONV_VECT_SER_CHANNEL_NUM;
@@ -212,7 +213,8 @@ conv_vect_ser
     .MTRX_NUM         ( CONV_VECT_SER_MTRX_NUM    ),
 //    .HOLD_DATA        ( CONV_VECT_SER_HOLD_DATA   ),
     .INI_FILE         ( CONV_VECT_SER_INI_FILE    ),
-    .STRING_LEN       ( STRING2MATRIX_STRING_LEN  )
+    .STRING_LEN       ( STRING2MATRIX_STRING_LEN  ),
+    .BIAS_INI_FILE    ( CONV_VECT_BIAS_INI_FILE   )
 )
 conv_vect_ser_inst
 (
@@ -306,7 +308,7 @@ endgenerate
 
 
 generate
-    if ( CANCAT == 1 )
+    if ( CANCAT_OFF == 1 )
         begin: cancat_gen
 
             wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] wrusedw;
