@@ -34,6 +34,7 @@ module conv_layer
     parameter CONV_VECT_SER_HOLD_DATA           = 8,               
     parameter CONV_VECT_SER_INI_FILE            = "rom_init.txt",
     parameter CONV_VECT_BIAS_INI_FILE           = "rom_init.txt",
+    parameter CONV_VECT_BIAS_NUM                = 16,
 //
 //    parameter MAX_POOL_DATA_WIDTH               = 8, 
     parameter MAX_POOL_CHANNEL_NUM              = 3,
@@ -214,7 +215,8 @@ conv_vect_ser
 //    .HOLD_DATA        ( CONV_VECT_SER_HOLD_DATA   ),
     .INI_FILE         ( CONV_VECT_SER_INI_FILE    ),
     .STRING_LEN       ( STRING2MATRIX_STRING_LEN  ),
-    .BIAS_INI_FILE    ( CONV_VECT_BIAS_INI_FILE   )
+    .BIAS_INI_FILE    ( CONV_VECT_BIAS_INI_FILE   ),
+    .BIAS_NUM         ( CONV_VECT_BIAS_NUM        )    
 )
 conv_vect_ser_inst
 (

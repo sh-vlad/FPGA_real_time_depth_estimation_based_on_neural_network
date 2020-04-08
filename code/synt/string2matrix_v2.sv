@@ -28,7 +28,7 @@ module string2matrix_v2
 );
     localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
     localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
-    localparam FIFO_DEPTH = 2**($clog2(STRING_LEN*CHANNEL_NUM*2));//2**($clog2(STRING_LEN*CHANNEL_NUM*HOLD_DATA));
+    localparam FIFO_DEPTH = 2**($clog2(STRING_LEN*CHANNEL_NUM*4));//2**($clog2(STRING_LEN*CHANNEL_NUM*HOLD_DATA));//2**($clog2(STRING_LEN*CHANNEL_NUM*2));
     localparam LPM_WIDTHU = ($clog2(FIFO_DEPTH));
 	localparam CNT_FIFO   = $clog2(MATRIX_SIZE)+1;
 	localparam HOLD_DATA_CNT_WIDTHU = $clog2(HOLD_DATA+1);
@@ -56,7 +56,8 @@ module string2matrix_v2
     reg                                             global_valid;
     reg     [5:0]                                   hold_cnt2wire;
     reg                                             eof;                                    
-    reg     [$clog2(STRING_LEN*CHANNEL_NUM)-1:0]    out_cnt;
+//    reg     [$clog2(STRING_LEN*CHANNEL_NUM)-1:0]    out_cnt;
+    reg[$clog2((CHANNEL_NUM*STRING_LEN+CHANNEL_NUM*2))-1:0]    out_cnt;
     reg                                             sop_imp;
     reg     [ 5: 0]                                 eop_imp; 
     wire    [ 2: 0]                                 fifo_full;
@@ -403,7 +404,7 @@ sh_reg_1
         
 reg valid_by_cnt;
 
-    always @( posedge clk or reset_n )
+    always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             valid_by_cnt <= 1'h0;
         else
@@ -471,7 +472,8 @@ reg valid_by_cnt;
         if ( !reset_n )
             eof_o <= 1'h0;
         else
-            if ( sh_cs[6] == s_last_0 && eop_imp[2] )
+            //if ( sh_cs[6] == s_last_0 && eop_imp[2] )
+            if ( sh_cs[6] >= s_last_1 && eop_imp[2] )
                 eof_o <= out_cnt == 0;
             else
                 eof_o <= 1'h0;
@@ -487,9 +489,9 @@ int cnt_wr=0;
 int cnt_rd=0;
     always @(posedge clk)   
         begin
-            assert ( !fifo_full[0] ) else begin $error("FIFO 0 FULL!!!"); $stop; end; 
-            assert ( !fifo_full[1] ) else begin $error("FIFO 1 FULL!!!"); $stop; end; 
-            assert ( !fifo_full[2] ) else begin $error("FIFO 2 FULL!!!"); $stop; end; 
+            assert ( !fifo_full[0] ) else begin $error("FIFO 0 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
+            assert ( !fifo_full[1] ) else begin $error("FIFO 1 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
+            assert ( !fifo_full[2] ) else begin $error("FIFO 2 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
         end
     
 always @(posedge fifo_wr_ )
