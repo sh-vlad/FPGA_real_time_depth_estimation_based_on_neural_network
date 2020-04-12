@@ -67,6 +67,26 @@ module string2matrix_v2
 	reg		[3:0]									start;
 	reg												padding_wr;
     reg                                             second_padding;
+    logic   [$clog2(STRING_LEN)-1:0]                eop_cnt;
+    logic                                           padding_flag;  
+    
+    enum reg [3:0] 
+    {
+        s_idle      = 4'd1,
+        s_first_0   = 4'd2,
+        s_first_1   = 4'd3,
+        s_first_2   = 4'd4,
+        s_work      = 4'd5,
+        s_last_2    = 4'd6, 
+        s_last_1    = 4'd7,
+        s_last_0    = 4'd8
+    }cs,ns, sh_cs[7:0];      
+
+    always_ff @( posedge clk or negedge reset_n )
+        if ( !reset_n )
+            padding_flag <= 0;
+        else
+            padding_flag <= ( (cs==s_idle) && (sh_cs[0]==s_last_0) ) ? 1 : 0;  
 	always@ (posedge clk or negedge reset_n )
 		if ( !reset_n )
 			start <= '0;
@@ -103,18 +123,8 @@ module string2matrix_v2
                 second_padding <= 1'h1;
             else if ( second_padding && padding_cnt == CHANNEL_NUM )
                 second_padding  <= 1'h0;	
-                
-    enum reg [3:0] 
-    {
-        s_idle      = 4'd1,
-        s_first_0   = 4'd2,
-        s_first_1   = 4'd3,
-        s_first_2   = 4'd4,
-        s_work      = 4'd5,
-        s_last_2    = 4'd6, 
-        s_last_1    = 4'd7,
-        s_last_0    = 4'd8
-    }cs,ns, sh_cs[7:0];   
+              
+
 //
     always @( posedge clk )
         hold_cnt2wire <= {hold_cnt2wire[4:0],(hold_cnt!=0)};
@@ -417,7 +427,9 @@ reg valid_by_cnt;
         if ( !reset_n )
             out_cnt <= '0;
         else
-            if ( ( out_cnt == (CHANNEL_NUM*STRING_LEN+CHANNEL_NUM*2)-1 ) && hold_cnt == 4 )
+            if ( padding_flag )
+                out_cnt <= '0;
+            else if ( ( out_cnt == (CHANNEL_NUM*STRING_LEN+CHANNEL_NUM*2)-1 ) && hold_cnt == 4 )
                 out_cnt <= '0;
             else if ( hold_cnt == 4/*hold_cnt2wire[2]*/ /*& global_valid*/ )
                 out_cnt <= out_cnt + 1'h1;
@@ -449,7 +461,7 @@ reg valid_by_cnt;
                 sop_o <= out_cnt == CHANNEL_NUM*2+1 ;
             else    
                 sop_o <= 1'h0;
- 
+/* 
     always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             eop_o <= 1'h0;
@@ -458,7 +470,7 @@ reg valid_by_cnt;
                 eop_o <= out_cnt == 0;
             else    
                 eop_o <= 1'h0;
-    
+*/    
     always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             sof_o <= 1'h0;
@@ -467,7 +479,7 @@ reg valid_by_cnt;
                 sof_o <= out_cnt == CHANNEL_NUM*2+1;
             else
                 sof_o <= 1'h0;
-
+/*
     always @( posedge clk or negedge reset_n )
         if ( !reset_n )
             eof_o <= 1'h0;
@@ -477,12 +489,57 @@ reg valid_by_cnt;
                 eof_o <= out_cnt == 0;
             else
                 eof_o <= 1'h0;
-    
-	//output logic					sop_o,
-    //output logic					eop_o,
-    //output logic					sof_o,
-    //output logic					eof_o 
-    
+*/    
+    always_ff @( posedge clk or negedge reset_n )
+        if ( !reset_n )
+            eop_cnt <= '0;
+        else
+            if ( eop_imp[3] && (out_cnt == 0) && ( eop_cnt == STRING_LEN+1 ) )
+                eop_cnt <= '0;
+            else if ( eop_imp[3] && (out_cnt == 0) )
+                eop_cnt <= eop_cnt + 1;                                                                            
+ //
+ /*
+logic eof_o_tmp,eop_o_tmp;
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        eof_o_tmp <= 1'h0;
+    else
+        //if ( sh_cs[6] == s_last_0 && eop_imp[2] )
+        if ( (eop_cnt == STRING_LEN)&&(out_cnt == 0) && eop_imp[2] )
+            eof_o_tmp <= 1;
+        else
+            eof_o_tmp <= 1'h0;
+            
+    always @( posedge clk or negedge reset_n )
+        if ( !reset_n )
+            eop_o_tmp <= 1'h0;
+        else
+            if ( (eop_cnt > 0 )&&(eop_cnt <= STRING_LEN)&&(out_cnt == 0) && eop_imp[2] )
+                eop_o_tmp <= 1;
+            else    
+                eop_o_tmp <= 1'h0;
+*/                
+// 
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        eof_o <= 1'h0;
+    else
+        //if ( sh_cs[6] == s_last_0 && eop_imp[2] )
+        if ( (eop_cnt == STRING_LEN)&&(out_cnt == 0) && eop_imp[2] )
+            eof_o <= 1;
+        else
+            eof_o <= 1'h0;
+            
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        eop_o <= 1'h0;
+    else
+        if ( (eop_cnt > 0 )&&(eop_cnt <= STRING_LEN)&&(out_cnt == 0) && eop_imp[2] )
+            eop_o <= 1;
+        else    
+            eop_o <= 1'h0;
+//
 `ifdef SYNT
 `else
 int cnt_wr=0;
