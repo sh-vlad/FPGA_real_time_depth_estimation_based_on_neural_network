@@ -51,7 +51,7 @@ reg                                     sh_fifoe_empty;
 wire                                    n_fifoe_empty;
 wire                                    fifoe_rd;
 
-reg [31:0]                              smpl_cnt;
+reg [$clog2(STRING_LEN):0]/*[31:0]*/    smpl_cnt;
 reg [3:0]                               sh_valid;
 wire                                    n_valid;
 reg                                     valid_o_imp;
@@ -70,7 +70,7 @@ always @( posedge clk or negedge reset_n )
         if ( smpl_cnt == STRING_LEN/*-1*/ )
             smpl_cnt <= '0;
         else if ( n_valid )
-            smpl_cnt <= smpl_cnt + 1;
+            smpl_cnt <= smpl_cnt + 1'h1;
 
 always @( posedge clk )
     sh_data_i <= data_i;
@@ -120,13 +120,18 @@ reg [1:0]data_valid_it;
 reg [1:0]sop_it;
 reg [1:0]eop_it; 
 
-always @( posedge clk )
-    if ( !sh_row_mark && !sh_line_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd1;
-    else if ( !sh_row_mark && sh_line_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd2;
-    else if ( sh_row_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd3;
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        row_line_mark_it <= '0;
+    else
+        if ( eof_o )
+            row_line_mark_it <= '0;
+        else if ( !sh_row_mark && !sh_line_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd1;
+        else if ( !sh_row_mark && sh_line_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd2;
+        else if ( sh_row_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd3;
 
 always @( posedge clk )
     fifo_sh_data_it <= (fifo_out>sh_data_i) ? 1'h1 : 1'h0 ;          

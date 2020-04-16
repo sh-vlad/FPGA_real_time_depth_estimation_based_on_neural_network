@@ -107,6 +107,7 @@ wire	                        eof_o_l7       ;
 //
 conv_layer
 #(
+    .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                                ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[0]      ),      
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[0]      ),
@@ -144,13 +145,14 @@ conv_layer_l0
     .eop_o                            ( eop_o_ll0                ),
     .sof_o                            ( sof_o_ll0                ),
     .eof_o                            ( eof_o_ll0                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[0]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[0]       )
+    .ddr_fifo_rd                      (        ), 
+    .ddr_fifo_afull                   (        )
 );
 //
 
 conv_layer
 #(
+    .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[1]     ),
@@ -188,12 +190,13 @@ conv_layer_l1
     .eop_o                            ( eop_o_ll1                ),
     .sof_o                            ( sof_o_ll1                ),
     .eof_o                            ( eof_o_ll1                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[1]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[1]       )
+    .ddr_fifo_rd                      (        ), 
+    .ddr_fifo_afull                   (        )
 );
 //////////////////////////////
 conv_layer
 #(
+    .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[0]      ),      
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[0]      ),
@@ -237,6 +240,7 @@ conv_layer_r0
 //
 conv_layer
 #(
+    .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[1]     ),
@@ -303,7 +307,7 @@ concat_channels_lr
 //
 conv_layer
 #(
-
+    .CANCAT_OFF                       ( 0                                ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[2]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[2]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[2]    ),
@@ -340,13 +344,13 @@ conv_layer_2
     .eop_o                            ( eop_o_l2                ),
     .sof_o                            ( sof_o_l2                ),
     .eof_o                            ( eof_o_l2                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[2]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[2]       )
+    .ddr_fifo_rd                      ( ddr_fifo_rd[1]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[1]       )
 );
 //
 conv_layer
 #(
-
+    .CANCAT_OFF                       ( 0                                ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[3]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[3]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[3]    ),
@@ -384,13 +388,13 @@ conv_layer_3
     .eop_o                            ( eop_o_l3                ),
     .sof_o                            ( sof_o_l3                ),
     .eof_o                            ( eof_o_l3                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[3]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[3]       )
+    .ddr_fifo_rd                      ( ddr_fifo_rd[2]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[2]       )
 );
 //
 conv_layer
 #(
-
+    .CANCAT_OFF                       ( 0                                ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[4]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[4]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[4]    ),
@@ -428,13 +432,14 @@ conv_layer_4
     .eop_o                            ( eop_o_l4                ),
     .sof_o                            ( sof_o_l4                ),
     .eof_o                            ( eof_o_l4                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[4]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[4]       )    
+    .ddr_fifo_rd                      ( ddr_fifo_rd[3]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[3]       )    
 );
 
 //
 conv_layer
 #(
+    .CANCAT_OFF                       ( 0                                ),
     .MAX_POOL_OFF                     ( 0                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[5]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[5]     ),
@@ -473,12 +478,13 @@ conv_layer_5
     .eop_o                            ( eop_o_l5                ),
     .sof_o                            ( sof_o_l5                ),
     .eof_o                            ( eof_o_l5                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[5]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[5]       )
+    .ddr_fifo_rd                      ( ddr_fifo_rd[4]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[4]       )
 );
 //
 conv_layer
 #(
+    .CANCAT_OFF                       ( 0                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[6]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[6]     ),
@@ -517,8 +523,8 @@ conv_layer_6
     .eop_o                            ( eop_o_l6                ),
     .sof_o                            ( sof_o_l6                ),
     .eof_o                            ( eof_o_l6                ),
-    .ddr_fifo_rd                      (                         ), 
-    .ddr_fifo_afull                   (                         )
+    .ddr_fifo_rd                      ( ddr_fifo_rd[5]          ), 
+    .ddr_fifo_afull                   ( ddr_fifo_afull[5]       )
 );
 
 max_pool_7
@@ -553,63 +559,64 @@ assign eop_o        = eop_o_l7       ;
 assign sof_o        = sof_o_l7       ;
 assign eof_o        = eof_o_l7       ;
 */
-`ifndef SYNT
-int l5_file_d,l5_file_v,l5_file_sop,l5_file_eop,l5_file_sof,l5_file_eof;
- 
-initial 
-    begin
-        l5_file_d =   $fopen("output_data/l5_output_d.txt","w");
-        l5_file_v =   $fopen("output_data/l5_output_v.txt","w");
-        l5_file_sop = $fopen("output_data/l5_output_sop.txt","w");
-        l5_file_eop = $fopen("output_data/l5_output_eop.txt","w");        
-        l5_file_sof = $fopen("output_data/l5_output_sof.txt","w");
-        l5_file_eof = $fopen("output_data/l5_output_eof.txt","w");              
-        
-    end
-/*
-initial begin
-    forever begin
-        @( posedge data_valid_o_ll0 );
-        repeat (116480*2) @( posedge clk )
-            begin
-                $fdisplay(l5_file_v,"%h",data_valid_o_ll0);        
-                if (data_valid_o_ll0)
-                    $fdisplay(l5_file_d,"%h",data_o_ll0);
-                else
-                    $fdisplay(l5_file_d,"%h",1'h0);
-            end        
-    end
-end
-*/
-
-initial begin
-    forever begin
-        @( posedge data_valid_o_l5 );
-        repeat (116480*2) @( posedge clk )
-            begin
-                $fdisplay(l5_file_v,"%h",data_valid_o_l5);  
-                
-                $fdisplay(l5_file_sop,"%h",sop_o_l5);  
-                $fdisplay(l5_file_eop,"%h",eop_o_l5);  
-                $fdisplay(l5_file_sof,"%h",sof_o_l5);  
-                $fdisplay(l5_file_eof,"%h",eof_o_l5);  
-                if (data_valid_o_l5)
-                    $fdisplay(l5_file_d,"%h",data_o_l5);
-                else
-                    $fdisplay(l5_file_d,"%h",1'h0);
-            end        
-    end
-end
-
-/*
-always_ff @( posedge data_valid_o_l5 )
-    repeat (116480*2) @( posedge clk )
-        begin
-            $fdisplay(l5_file_d,"%h",data_o_l5);
-            $fdisplay(l5_file_v,"%h",data_valid_o_l5);
-        end
-*/        
-`endif   
+//`ifndef SYNT
+//int l5_file_d,l5_file_v,l5_file_sop,l5_file_eop,l5_file_sof,l5_file_eof;
+// 
+//initial 
+//    begin
+//        l5_file_d =   $fopen("output_data/l5_output_d.txt","w");
+//        l5_file_v =   $fopen("output_data/l5_output_v.txt","w");
+//        l5_file_sop = $fopen("output_data/l5_output_sop.txt","w");
+//        l5_file_eop = $fopen("output_data/l5_output_eop.txt","w");        
+//        l5_file_sof = $fopen("output_data/l5_output_sof.txt","w");
+//        l5_file_eof = $fopen("output_data/l5_output_eof.txt","w");              
+//        
+//    end
+///*
+//initial begin
+//    forever begin
+//        @( posedge data_valid_o_ll0 );
+//        repeat (116480*2) @( posedge clk )
+//            begin
+//                $fdisplay(l5_file_v,"%h",data_valid_o_ll0);        
+//                if (data_valid_o_ll0)
+//                    $fdisplay(l5_file_d,"%h",data_o_ll0);
+//                else
+//                    $fdisplay(l5_file_d,"%h",1'h0);
+//            end        
+//    end
+//end
+//*/
+//
+//initial begin
+//    forever begin
+//        @( posedge data_valid_o_l5 );
+//        repeat (116480*2) @( posedge clk )
+//            begin
+//                $fdisplay(l5_file_v,"%h",data_valid_o_l5);  
+//                
+//                $fdisplay(l5_file_sop,"%h",sop_o_l5);  
+//                $fdisplay(l5_file_eop,"%h",eop_o_l5);  
+//                $fdisplay(l5_file_sof,"%h",sof_o_l5);  
+//                $fdisplay(l5_file_eof,"%h",eof_o_l5);  
+//                if (data_valid_o_l5)
+//                    $fdisplay(l5_file_d,"%h",data_o_l5);
+//                else
+//                    $fdisplay(l5_file_d,"%h",1'h0);
+//            end        
+//    end
+//end
+//
+///*
+//always_ff @( posedge data_valid_o_l5 )
+//    repeat (116480*2) @( posedge clk )
+//        begin
+//            $fdisplay(l5_file_d,"%h",data_o_l5);
+//            $fdisplay(l5_file_v,"%h",data_valid_o_l5);
+//        end
+//*/        
+//`endif   
+assign ddr_fifo_afull[0] = 0;
 endmodule
 
        

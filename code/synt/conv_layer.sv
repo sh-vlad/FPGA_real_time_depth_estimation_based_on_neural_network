@@ -3,7 +3,7 @@
 module conv_layer
 #(
     parameter MAX_POOL_OFF                      = 0,  
-    parameter CANCAT_OFF                        = 0,
+    parameter CANCAT_OFF                        = 1,
 /*
     parameter DATA_WIDTH    = 8,
     parameter CHAN_NUM      = 3
@@ -310,7 +310,7 @@ endgenerate
 
 
 generate
-    if ( CANCAT_OFF == 1 )
+    if ( CANCAT_OFF == 0 )
         begin: cancat_gen
 
             wire [$clog2(STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)-1:0] wrusedw;
@@ -366,7 +366,8 @@ endgenerate
         begin
             assert ( !wrfull ) else begin $error("conv_layer FIFO 0 FULL!!!"); $stop; end; 
         end
-`endif            
+`endif  
+$display("%m : my message");          
         */
 endmodule
 

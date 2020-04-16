@@ -86,12 +86,12 @@ module string2matrix_v2
         if ( !reset_n )
             padding_flag <= 0;
         else
-            padding_flag <= ( (cs==s_idle) && (sh_cs[0]==s_last_0) ) ? 1 : 0;  
+            padding_flag <= ( (sh_cs[4]==s_idle) && (sh_cs[5]==s_last_0) ) ? 1 : 0;  
 	always@ (posedge clk or negedge reset_n )
 		if ( !reset_n )
 			start <= '0;
 		else 
-			if ( start < 15 || eop_i || (second_padding && padding_cnt == CHANNEL_NUM) )
+			if ( start < 15 || padding_flag ||/*padding_flag*/eop_i || (second_padding && padding_cnt == CHANNEL_NUM) )
 				start <= start + 1'h1;
 			
 		
@@ -427,7 +427,7 @@ reg valid_by_cnt;
         if ( !reset_n )
             out_cnt <= '0;
         else
-            if ( padding_flag )
+            if ( sof_i )
                 out_cnt <= '0;
             else if ( ( out_cnt == (CHANNEL_NUM*STRING_LEN+CHANNEL_NUM*2)-1 ) && hold_cnt == 4 )
                 out_cnt <= '0;

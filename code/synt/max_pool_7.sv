@@ -52,14 +52,16 @@ reg                                     sh_fifoe_empty;
 wire                                    n_fifoe_empty;
 wire                                    fifoe_rd;
 
-reg [31:0]                              line_cnt;
+reg [$clog2(STRING_LEN):0]/*[31:0]*/    line_cnt;
 reg [3:0]                               sh_valid;
 wire                                    n_valid;
 reg                                     valid_o_imp;
-reg                                     work;
-reg [$clog2(STRING_LEN):0]              cnt_out;
+//reg                                     work;
+//reg [$clog2(STRING_LEN):0]              cnt_out;
 reg [$clog2(STRING_LEN):0]              smpl_cnt; 
-
+logic [$clog2(STRING_LEN**2):0]         all_smpl_cnt; 
+logic [3:0]                             all_smpl_cnt_max;
+reg [$clog2(STRING_LEN):0]              sh_smpl_cnt[4]; 
 reg                                     line_cnt_max;
 reg                                     sh_line_cnt_max;
 reg                                     chan_cnt_max;
@@ -142,6 +144,21 @@ always @( posedge clk or negedge reset_n )
         else if ( ( ( chan_cnt == CHANNEL_NUM-1 )/* && ( smpl_cnt == 6 ) */) )
             row_mark <= 1'h1;
 
+
+always_ff @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        all_smpl_cnt <= '0;
+    else
+        if ( ( chan_cnt == CHANNEL_NUM-1 ) && ( all_smpl_cnt == 48 ) )
+            all_smpl_cnt <= '0;            
+        else if ( chan_cnt == CHANNEL_NUM-1 )
+            all_smpl_cnt <= all_smpl_cnt + 1;    
+
+always_ff @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        all_smpl_cnt_max <= '0;
+    else
+        all_smpl_cnt_max <= {all_smpl_cnt_max[2:0],( all_smpl_cnt == 48 )};
 ////
 
 always @( posedge clk or negedge reset_n )   
@@ -152,6 +169,13 @@ always @( posedge clk or negedge reset_n )
             smpl_cnt <= '0;            
         else if ( chan_cnt == CHANNEL_NUM-1 )
             smpl_cnt <= smpl_cnt + 1;
+            
+always_ff @( posedge clk ) 
+    begin
+        sh_smpl_cnt[0] <= smpl_cnt;
+        for ( int i = 0; i < 3; i++ )
+            sh_smpl_cnt[i+1] <= sh_smpl_cnt[i];
+    end    
 ///            
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
@@ -169,7 +193,7 @@ always @( posedge clk )
 //
 reg [1:0]                   row_line_mark_it;
 reg                         max_sh_data_it;
-reg                         fifo_sh_data_it;
+//reg                         fifo_sh_data_it;
 reg [1:0]                   fifo_rd_it;
 reg [1:0]                   fifo_wr_it;
 reg  signed[DATA_WIDTH-1:0] sh_data_i_it;
@@ -180,16 +204,21 @@ reg [1:0]data_valid_it;
 reg [1:0]sop_it;
 reg [1:0]eop_it; 
 
-always @( posedge clk )
-    if ( !sh_row_mark && !sh_line_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd1;
-    else if ( !sh_row_mark && sh_line_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd2;
-    else if ( sh_row_mark && sh_valid[0] )
-        row_line_mark_it <= 3'd3;
+always @( posedge clk  or negedge reset_n )
+    if ( !reset_n )
+        row_line_mark_it <= '0;
+    else
+        if ( eof_o )
+            row_line_mark_it <= '0;
+        else if ( !sh_row_mark && !sh_line_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd1;
+        else if ( !sh_row_mark && sh_line_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd2;
+        else if ( sh_row_mark && sh_valid[0] )
+            row_line_mark_it <= 3'd3;
 
-always @( posedge clk )
-    fifo_sh_data_it <= (fifo_out>sh_data_i) ? 1'h1 : 1'h0 ;          
+//always @( posedge clk )
+//    fifo_sh_data_it <= (fifo_out>sh_data_i) ? 1'h1 : 1'h0 ;          
         
 
 
@@ -269,6 +298,8 @@ always @( posedge clk )
     fifo_wr <= /*~sh_line_mark & sh_row_mark &*/ sh_valid[0];
 
 assign fifo_rd = /*line_mark & !row_mark &*//*sh1_row_mark*/row_mark & valid_i;
+
+wire short_fifo_wr = (all_smpl_cnt_max)&&(sh_smpl_cnt_max[2]) ? 1'h0 : fifo_wr_it[1];
     
 scfifo
 #(
@@ -283,7 +314,7 @@ scfifo_inst
     .clock          ( clk                       ),
     .data           ( max_it_ram[1]/*max[sh_chan_cnt[3]]*/          ),
     .rdreq          ( fifo_rd/*fifo_rd_it[1] */                  ),
-    .wrreq          ( fifo_wr_it[1]/*fifo_rd_it[1]*/                   ),
+    .wrreq          ( short_fifo_wr/*fifo_wr_it[1]&(~all_smpl_cnt_max)&(~sh_smpl_cnt_max[2])*//**//*fifo_rd_it[1]*/                   ),
     .empty          (                           ),
     .full           (),
     .q              ( fifo_out                  ),
@@ -298,24 +329,24 @@ scfifo_inst
 
 
 
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        cnt_out <= '0;
-    else
-        if ( cnt_out == STRING_LEN/2 && ( !valid_o_imp && data_valid_it[0]/*data_valid_o*/ ) )
-            cnt_out <= '0;
-        else if ( valid_o_imp && !data_valid_it[0]/*data_valid_o*/ )
-            cnt_out <= cnt_out + 1'h1;
+//always @( posedge clk or negedge reset_n )
+//    if ( !reset_n )
+//        cnt_out <= '0;
+//    else
+//        if ( cnt_out == STRING_LEN/2 && ( !valid_o_imp && data_valid_it[0]/*data_valid_o*/ ) )
+//            cnt_out <= '0;
+//        else if ( valid_o_imp && !data_valid_it[0]/*data_valid_o*/ )
+//            cnt_out <= cnt_out + 1'h1;
             
 
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        work <= 1'h0;
-    else
-        if ( eof_i )
-            work <= 1'h0;
-        else if ( sof_o )
-            work <= 1'h1;
+//always @( posedge clk or negedge reset_n )
+//    if ( !reset_n )
+//        work <= 1'h0;
+//    else
+//        if ( eof_i )
+//            work <= 1'h0;
+//        else if ( sof_o )
+//            work <= 1'h1;
 
 always @( posedge clk ) 
     valid_o_imp <= sh_line_cnt_max && sh_valid[2] && sh_smpl_cnt_max[1];   
