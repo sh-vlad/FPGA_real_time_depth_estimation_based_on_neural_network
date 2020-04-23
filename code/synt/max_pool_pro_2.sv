@@ -323,10 +323,6 @@ always @( posedge clk )
         data_valid_it[1]   <= data_valid_it[0];
         sop_it[1]          <= sop_it[0];
         eop_it[1]          <= eop_it[0];
-       
-        data_valid_o  <= data_valid_it[1];
-        sop_o         <= sop_it[1];
-        eop_o         <= eop_it[1];
     end
     
 always @( posedge clk or negedge reset_n )
