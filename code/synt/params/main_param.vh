@@ -6,7 +6,7 @@ parameter  integer STRING2MATRIX_DATA_WIDTH  [7]        = '{8  ,8  ,     8,     
 parameter  integer STRING2MATRIX_STRING_LEN  [7]        = '{224,224,     112,    56,     28,     14,     7};//{224,     112    };
 parameter  integer STRING2MATRIX_MATRIX_SIZE [7]        = '{3  ,3  ,     3,      3,      3,      3,      3};
 parameter  integer STRING2MATRIX_CHANNEL_NUM [7]        = '{3  ,16 ,     32,     16,     32,     64,     128};
-parameter  integer STRING2MATRIX_HOLD_DATA   [7]        = '{16 ,16 ,     16,     32,     64,     128,    256};
+parameter  integer STRING2MATRIX_HOLD_DATA   [7]        = '{16 ,8/*16*/ ,     16,     32,     64,     128,    256};
 //                                       
 parameter  integer CONV2_3X3_WRP_KERNEL_WIDTH[7]        = '{8,  8  ,      8,      8,      8,      8,      8};
 parameter  integer CONV2_3X3_WRP_MEM_DEPTH[7]           = '{3,  16,      32,     16,     32,     64,     128};
@@ -16,7 +16,7 @@ parameter string CONV2_3X3_INI_FILE [9]        = '{"conv20.txt","conv21.txt",
                                                                                                         "conv26.txt","conv27.txt","conv28.txt"};          
                                            
 parameter  integer CONV_VECT_SER_KERNEL_WIDTH[7]        = '{8 , 8 ,      8,      8,      8,      8,      8};
-parameter  integer CONV_VECT_SER_CHANNEL_NUM[7]         = '{16, 16,      16,     32,     64,     128,    256};
+parameter  integer CONV_VECT_SER_CHANNEL_NUM[7]         = '{16, 8/*16*/,      16,     32,     64,     128,    256};
 parameter  integer CONV_VECT_SER_MTRX_NUM[7]            = '{3 , 16,      32,     16,     32,     64,     128};
 parameter string CONV_VECT_SER_INI_FILE[9]     = '{"conv_vect0.txt","conv_vect1.txt",
                                                                     "conv_vect2.txt","conv_vect3.txt",

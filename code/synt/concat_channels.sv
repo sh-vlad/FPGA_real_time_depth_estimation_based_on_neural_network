@@ -2,7 +2,8 @@
 //e-mail: shvladspb@gmail.com
 module concat_channels
 #(
-    parameter DATA_WIDTH    = 8
+    parameter DATA_WIDTH        = 8,
+    parameter NUMBER_CHANNELS   = 2
 )
 (
 	input wire                                  clk, 

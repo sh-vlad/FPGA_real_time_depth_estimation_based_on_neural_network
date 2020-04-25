@@ -2,6 +2,8 @@
 //e-mail: shvladspb@gmail.com
 module conv_layer
 #(
+    parameter NUMBER_SPLITTED_CHANNELS          = 1, 
+//    parameter THIS_CHANNEL_NUMBER               = 1,
     parameter MAX_POOL_OFF                      = 0,  
     parameter CANCAT_OFF                        = 1,
 /*
@@ -131,12 +133,12 @@ wire            					    eop_conv2_wrp;
 wire            					    sof_conv2_wrp;
 wire            					    eof_conv2_wrp;
 //
-wire signed [RELU_DATA_WIDTH-1:0]       data_conv_vect_ser;
-wire                                    data_conv_vect_ser_valid;
-wire            					    sop_conv_vect_ser;
-wire            					    eop_conv_vect_ser;
-wire            					    sof_conv_vect_ser;
-wire            					    eof_conv_vect_ser;
+wire signed [RELU_DATA_WIDTH-1:0]       data_conv_vect_ser[NUMBER_SPLITTED_CHANNELS];
+wire                                    data_conv_vect_ser_valid[NUMBER_SPLITTED_CHANNELS];
+wire            					    sop_conv_vect_ser[NUMBER_SPLITTED_CHANNELS];
+wire            					    eop_conv_vect_ser[NUMBER_SPLITTED_CHANNELS];
+wire            					    sof_conv_vect_ser[NUMBER_SPLITTED_CHANNELS];
+wire            					    eof_conv_vect_ser[NUMBER_SPLITTED_CHANNELS];
 //
 wire signed [MAX_POOL_DATA_WIDTH-1:0]   data_ReLu;
 wire                                    data_ReLu_valid;
@@ -206,60 +208,75 @@ conv2_3x3_wrp_inst
     .eof_o          ( eof_conv2_wrp             )
 );
 //
-conv_vect_ser
-#(
-    .DATA_WIDTH 	  ( CONV_VECT_SER_DATA_WIDTH  ),
-    .KERNEL_WIDTH     ( CONV_VECT_SER_KERNEL_WIDTH),
-    .CHANNEL_NUM      ( CONV_VECT_SER_CHANNEL_NUM ),
-    .MTRX_NUM         ( CONV_VECT_SER_MTRX_NUM    ),
-//    .HOLD_DATA        ( CONV_VECT_SER_HOLD_DATA   ),
-    .INI_FILE         ( CONV_VECT_SER_INI_FILE    ),
-    .STRING_LEN       ( STRING2MATRIX_STRING_LEN  ),
-    .BIAS_INI_FILE    ( CONV_VECT_BIAS_INI_FILE   ),
-    .BIAS_NUM         ( CONV_VECT_BIAS_NUM        )    
-)
-conv_vect_ser_inst
-(
-    .clk              ( clk                     ),  
-    .reset_n          ( reset_n                 ),
-    .data_i           ( data_conv2_wrp      /*[0]*/ ),    
-	.valid_i          ( data_conv2_wrp_valid    ),    
-    .sop_i            ( sop_conv2_wrp           ),
-    .eop_i            ( eop_conv2_wrp           ),
-    .sof_i            ( sof_conv2_wrp           ),  
-    .eof_i            ( eof_conv2_wrp           ),
-
-    .data_o           ( data_conv_vect_ser      ),
-    .data_valid_o     ( data_conv_vect_ser_valid),
-    .sop_o            ( sop_conv_vect_ser       ),
-    .eop_o            ( eop_conv_vect_ser       ),
-    .sof_o            ( sof_conv_vect_ser       ),  
-    .eof_o            ( eof_conv_vect_ser       )
-);
+genvar cvs_gen;
+generate
+    for (genvar cvs_gen = 0; cvs_gen < NUMBER_SPLITTED_CHANNELS; cvs_gen++)
+        begin: CONV_VECT_SER_GEN
+            conv_vect_ser
+            #(
+                .NUMBER_SPLITTED_CHANNELS   ( NUMBER_SPLITTED_CHANNELS  ),
+                .THIS_CHANNEL_NUMBER        ( cvs_gen                         ),
+                .DATA_WIDTH 	            ( CONV_VECT_SER_DATA_WIDTH  ),
+                .KERNEL_WIDTH               ( CONV_VECT_SER_KERNEL_WIDTH),
+                .CHANNEL_NUM                ( CONV_VECT_SER_CHANNEL_NUM ),
+                .MTRX_NUM                   ( CONV_VECT_SER_MTRX_NUM    ),
+            //    .HOLD_DATA                  ( CONV_VECT_SER_HOLD_DATA   ),
+                .INI_FILE                   ( CONV_VECT_SER_INI_FILE    ),
+                .STRING_LEN                 ( STRING2MATRIX_STRING_LEN  ),
+                .BIAS_INI_FILE              ( CONV_VECT_BIAS_INI_FILE   ),
+                .BIAS_NUM                   ( CONV_VECT_BIAS_NUM        )    
+            )           
+            conv_vect_ser_inst          
+            (           
+                .clk                        ( clk                     ),  
+                .reset_n                    ( reset_n                 ),
+                .data_i                     ( data_conv2_wrp      /*[0]*/ ),    
+                .valid_i                    ( data_conv2_wrp_valid    ),    
+                .sop_i                      ( sop_conv2_wrp           ),
+                .eop_i                      ( eop_conv2_wrp           ),
+                .sof_i                      ( sof_conv2_wrp           ),  
+                .eof_i                      ( eof_conv2_wrp           ),
+            
+                .data_o                     ( data_conv_vect_ser[cvs_gen]      ),
+                .data_valid_o               ( data_conv_vect_ser_valid[cvs_gen]),
+                .sop_o                      ( sop_conv_vect_ser[cvs_gen]       ),
+                .eop_o                      ( eop_conv_vect_ser[cvs_gen]       ),
+                .sof_o                      ( sof_conv_vect_ser[cvs_gen]       ),  
+                .eof_o                      ( eof_conv_vect_ser[cvs_gen]       )
+            );
+        end
+endgenerate
 //
-ReLu
-#(
-    .DATA_WIDTH       ( RELU_DATA_WIDTH             ),
-    .MAX_DATA         ( RELU_MAX_DATA               ),
-    .DATA_O_WIDTH     ( STRING2MATRIX_DATA_WIDTH    )
-)
-ReLu_inst
-(
-    .clk               ( clk                        ),
-    .reset_n           ( reset_n                    ),
-    .data_i            ( data_conv_vect_ser         ), 
-	.valid_i           ( data_conv_vect_ser_valid   ),    
-    .sop_i             ( sop_conv_vect_ser          ),
-    .eop_i             ( eop_conv_vect_ser          ),
-    .sof_i             ( sof_conv_vect_ser          ),
-    .eof_i             ( eof_conv_vect_ser          ),
-    .data_o            ( data_ReLu                  ),
-    .data_valid_o      ( data_ReLu_valid            ),
-    .sop_o             ( sop_ReLu                   ),
-    .eop_o             ( eop_ReLu                   ),
-    .sof_o             ( sof_ReLu                   ),
-    .eof_o             ( eof_ReLu                   )
-);
+
+genvar rl_gen;
+generate
+    for (genvar rl_gen = 0; rl_gen < NUMBER_SPLITTED_CHANNELS; rl_gen++)
+        begin: RELU_GEN
+            ReLu
+            #(
+                .DATA_WIDTH       ( RELU_DATA_WIDTH             ),
+                .MAX_DATA         ( RELU_MAX_DATA               ),
+                .DATA_O_WIDTH     ( STRING2MATRIX_DATA_WIDTH    )
+            )
+            ReLu_inst
+            (
+                .clk               ( clk                                 ),
+                .reset_n           ( reset_n                             ),
+                .data_i            ( data_conv_vect_ser[rl_gen]          ), 
+                .valid_i           ( data_conv_vect_ser_valid[rl_gen]    ),    
+                .sop_i             ( sop_conv_vect_ser[rl_gen]           ),
+                .eop_i             ( eop_conv_vect_ser[rl_gen]           ),
+                .sof_i             ( sof_conv_vect_ser[rl_gen]           ),
+                .eof_i             ( eof_conv_vect_ser[rl_gen]           ),
+                .data_o            ( data_ReLu                           ),
+                .data_valid_o      ( data_ReLu_valid                     ),
+                .sop_o             ( sop_ReLu                            ),
+                .eop_o             ( eop_ReLu                            ),
+                .sof_o             ( sof_ReLu                            ),
+                .eof_o             ( eof_ReLu                            )
+            );
+        end
+endgenerate            
 //
 generate
     if ( MAX_POOL_OFF == 0 )

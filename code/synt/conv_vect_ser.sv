@@ -2,38 +2,40 @@
 `timescale 1 ns / 1 ns
 module conv_vect_ser
 #(
-    parameter DATA_WIDTH 		= 8,
-    parameter KERNEL_WIDTH      = 8,
-    parameter CHANNEL_NUM       = 3,
-    parameter MTRX_NUM          = 8,
-//    parameter HOLD_DATA         = 8,
-    parameter INI_FILE          = "rom_init.txt",
-    parameter STRING_LEN        = 224,
-    
-    parameter BIAS_NUM          = 16,
-    parameter BIAS_WIDTH        = 24,
-    parameter BIAS_INI_FILE     = "rom_init.txt"
+    parameter NUMBER_SPLITTED_CHANNELS  = 1,
+    parameter THIS_CHANNEL_NUMBER       = 1,
+    parameter DATA_WIDTH                 = 8,
+    parameter KERNEL_WIDTH              = 8,
+    parameter CHANNEL_NUM               = 3,
+    parameter MTRX_NUM                  = 8,
+//    parameter HOLD_DATA                 = 8,
+    parameter INI_FILE                  = "rom_init.txt",
+    parameter STRING_LEN                = 224,
+            
+    parameter BIAS_NUM                  = 16,
+    parameter BIAS_WIDTH                = 24,
+    parameter BIAS_INI_FILE             = "rom_init.txt"
 )
 (
     input wire                                                  clk,
     input wire                                                  reset_n,
     input wire                                                  sop_i,
     input wire                                                  eop_i,
-    input wire						                            sof_i,
-    input wire						                            eof_i, 
-	input wire                                                  valid_i,
+    input wire                                                  sof_i,
+    input wire                                                  eof_i, 
+    input wire                                                  valid_i,
     input logic  signed     [DATA_WIDTH-1:0]                    data_i,
 
     output logic signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   data_o,
     output logic                                                data_valid_o,
     output logic                                                sop_o,
     output logic                                                eop_o,
-    output logic					                            sof_o,
-    output logic					                            eof_o       
+    output logic                                                sof_o,
+    output logic                                                eof_o       
 );
 localparam RAM_STYLE = CHANNEL_NUM < 32 ? "logic" : "M10K";
 localparam ADDR_WIDTH = $clog2(CHANNEL_NUM);
-localparam MEM_DEPTH = CHANNEL_NUM*MTRX_NUM;
+localparam MEM_DEPTH = (CHANNEL_NUM*MTRX_NUM);
 
 reg  signed [KERNEL_WIDTH+DATA_WIDTH-1:0]           mult;
 reg  signed [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  accum[CHANNEL_NUM];
@@ -149,12 +151,12 @@ RAM
 )
 RAM_inst
 (
-	.data           ( test_ram_in            ),
-	.read_addr      ( sh_rom_addr[1]    ),
+    .data           ( test_ram_in            ),
+    .read_addr      ( sh_rom_addr[1]    ),
     .write_addr     ( sh_rom_addr[4]    ),
-	.we             ( 1'h1              ),
+    .we             ( 1'h1              ),
     .clk            ( clk               ),
-	.q              ( ram_out           )
+    .q              ( ram_out           )
 );           
             
             
@@ -181,7 +183,7 @@ RAM_inst
 //#(
 //    .add_ram_output_register    ( "ON"                         ),
 //    .intended_device_family     ( "Cyclone V"                  ),
-//	.lpm_widthu					( 6         	               ),
+//    .lpm_widthu                    ( 6                            ),
 //    .lpm_numwords               ( 64                           ),
 //    .lpm_width                  ( KERNEL_WIDTH+DATA_WIDTH      )
 //)
@@ -232,16 +234,20 @@ always @( posedge clk or negedge reset_n )
         
 ROM 
 #(
-   .DATA_WIDTH    ( KERNEL_WIDTH    ),
-   .MEM_DEPTH     ( MEM_DEPTH       ),
-   .RAM_STYLE     ( "M10K"          ),
-   .INI_FILE      ( INI_FILE        )
-)
-ROM_init
-(
-    .clk          ( clk             ), 
-    .addr         ( rom_addr        ),
-    .q            ( kernel          )
+   .TYPE                    ( "CVS_KERNEL"              ),
+   .NUMBER_SPLITTED_CHANNELS(NUMBER_SPLITTED_CHANNELS   ),
+   .THIS_CHANNEL_NUMBER     ( THIS_CHANNEL_NUMBER       ),
+   .CHANNEL_NUM             ( CHANNEL_NUM               ),
+   .DATA_WIDTH              ( KERNEL_WIDTH              ),
+   .MEM_DEPTH               ( MEM_DEPTH                 ),
+   .RAM_STYLE               ( "M10K"                    ),
+   .INI_FILE                ( INI_FILE                  )
+)                       
+ROM_init                        
+(                       
+    .clk                    ( clk                       ), 
+    .addr                   ( rom_addr                  ),
+    .q                      ( kernel                    )
 );
          
 /*
@@ -254,7 +260,7 @@ scfifo
 #(
     .add_ram_output_register    ( "ON"                                  ),
     .intended_device_family     ( "Cyclone V"                           ),
-	.lpm_widthu					( 6         	                        ),
+    .lpm_widthu                    ( 6                                     ),
     .lpm_numwords               ( 64                                    ),
     .lpm_width                  ( KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM      )
 )
@@ -351,16 +357,19 @@ always_ff @( posedge clk or negedge reset_n )
 wire signed [BIAS_WIDTH-1:0] bias;            
 ROM 
 #(
-   .DATA_WIDTH    ( BIAS_WIDTH      ),
-   .MEM_DEPTH     ( BIAS_NUM        ),
-   .RAM_STYLE     ( "M10K"          ),
-   .INI_FILE      ( BIAS_INI_FILE   )
+   .TYPE                    ( "CVS_BIAS"                ),
+   .NUMBER_SPLITTED_CHANNELS(NUMBER_SPLITTED_CHANNELS   ),
+   .THIS_CHANNEL_NUMBER     ( THIS_CHANNEL_NUMBER       ),
+   .DATA_WIDTH              ( BIAS_WIDTH      ),
+   .MEM_DEPTH               ( BIAS_NUM        ),
+   .RAM_STYLE               ( "M10K"          ),
+   .INI_FILE                ( BIAS_INI_FILE   )
 )
 ROM_bias_init
 (
-    .clk          ( clk             ), 
-    .addr         ( bias_addr       ),
-    .q            ( bias                )
+    .clk                    ( clk             ), 
+    .addr                   ( bias_addr       ),
+    .q                      ( bias                )
 );
 
 
@@ -423,7 +432,4 @@ always @( posedge clk )
     */
 endmodule
 
-//    output logic  sop_o,
-//    output logic  eop_o,
-//    output logic  sof_o,
-//    output logic  eof_o 
+

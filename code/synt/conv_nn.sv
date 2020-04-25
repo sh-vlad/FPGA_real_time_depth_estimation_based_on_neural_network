@@ -107,6 +107,7 @@ wire	                        eof_o_l7       ;
 //
 conv_layer
 #(
+    .NUMBER_SPLITTED_CHANNELS         ( 1                                ),
     .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                                ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[0]      ),      
@@ -123,6 +124,7 @@ conv_layer
     .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
     .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[0]        ),
+//    .CONV_VECT_BIAS_NUM               ( 8                              ),  
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[0]      ),
     .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[0]            ),
@@ -152,6 +154,7 @@ conv_layer_l0
 
 conv_layer
 #(
+    .NUMBER_SPLITTED_CHANNELS         ( 2                                ),
     .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
@@ -169,6 +172,7 @@ conv_layer
     .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[1]       ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[1]      ),
+    .CONV_VECT_BIAS_NUM               ( 8                              ),    
     .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[1]           ),
     
@@ -193,9 +197,10 @@ conv_layer_l1
     .ddr_fifo_rd                      (        ), 
     .ddr_fifo_afull                   (        )
 );
-//////////////////////////////
+////////////////////////////
 conv_layer
 #(
+    .NUMBER_SPLITTED_CHANNELS         ( 1                                ),
     .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[0]      ),      
@@ -240,6 +245,7 @@ conv_layer_r0
 //
 conv_layer
 #(
+    .NUMBER_SPLITTED_CHANNELS         ( 2                                ),
     .CANCAT_OFF                       ( 1                                ),
     .MAX_POOL_OFF                     ( 1                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
@@ -348,209 +354,210 @@ conv_layer_2
     .ddr_fifo_afull                   ( ddr_fifo_afull[1]       )
 );
 //
-conv_layer
-#(
-    .CANCAT_OFF                       ( 0                                ),
-    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[3]     ),            
-    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[3]     ),
-    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[3]    ),
-    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[3]    ),
-    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[3]      ),    
-
-    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[3]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[3]      ),
-    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[5]           ), 
-    
-    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[3]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[3]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[3]       ),
-    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[5]       ),
-    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[5]      ),    
-    .CONV_VECT_BIAS_NUM               ( 32                              ),    
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[3]         ),
-    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[3]           ),
-    
-    .RELU_MAX_DATA                    ( RELU_MAX_DATA[3]                )
-)
-conv_layer_3
-(
-	.clk                              ( clk                     ),      
-    .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l2               ),     
-    .data_valid_i                     ( data_valid_o_l2         ),   
-    .sop_i                            ( sop_o_l2                ),
-    .eop_i                            ( eop_o_l2                ),
-    .sof_i                            ( sof_o_l2                ),
-    .eof_i                            ( eof_o_l2                ),
-    .data_o                           ( data_o_l3               ),
-    .data_valid_o                     ( data_valid_o_l3         ),
-	.sop_o                            ( sop_o_l3                ),
-    .eop_o                            ( eop_o_l3                ),
-    .sof_o                            ( sof_o_l3                ),
-    .eof_o                            ( eof_o_l3                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[2]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[2]       )
-);
+//conv_layer
+//#(
+//    .CANCAT_OFF                       ( 0                                ),
+//    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[3]     ),            
+//    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[3]     ),
+//    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[3]    ),
+//    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[3]    ),
+//    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[3]      ),    
 //
-conv_layer
-#(
-    .CANCAT_OFF                       ( 0                                ),
-    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[4]     ),            
-    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[4]     ),
-    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[4]    ),
-    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[4]    ),
-    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[4]      ),    
-
-    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[4]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[4]      ),
-    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[6]           ), 
-    
-    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[4]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[4]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[4]       ),
-    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[6]       ),
-    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[6]      ),    
-    .CONV_VECT_BIAS_NUM               ( 64                              ), 
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[4]         ),
-    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[4]           ),
-    
-    .RELU_MAX_DATA                    ( RELU_MAX_DATA[4]                )
-)
-conv_layer_4
-(
-	.clk                              ( clk                     ),      
-    .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l3               ),     
-    .data_valid_i                     ( data_valid_o_l3         ),   
-    .sop_i                            ( sop_o_l3                ),
-    .eop_i                            ( eop_o_l3                ),
-    .sof_i                            ( sof_o_l3                ),
-    .eof_i                            ( eof_o_l3                ),
-    .data_o                           ( data_o_l4               ),
-    .data_valid_o                     ( data_valid_o_l4         ),
-	.sop_o                            ( sop_o_l4                ),
-    .eop_o                            ( eop_o_l4                ),
-    .sof_o                            ( sof_o_l4                ),
-    .eof_o                            ( eof_o_l4                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[3]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[3]       )    
-);
+//    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[3]   ),
+//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[3]      ),
+//    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[5]           ), 
+//    
+//    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[3]   ),
+//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[3]    ),
+//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[3]       ),
+//    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[5]       ),
+//    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[5]      ),    
+//    .CONV_VECT_BIAS_NUM               ( 32                              ),    
+//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[3]         ),
+//    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[3]           ),
+//    
+//    .RELU_MAX_DATA                    ( RELU_MAX_DATA[3]                )
+//)
+//conv_layer_3
+//(
+//	.clk                              ( clk                     ),      
+//    .reset_n                          ( reset_n                 ),
+//	.data_i                           ( data_o_l2               ),     
+//    .data_valid_i                     ( data_valid_o_l2         ),   
+//    .sop_i                            ( sop_o_l2                ),
+//    .eop_i                            ( eop_o_l2                ),
+//    .sof_i                            ( sof_o_l2                ),
+//    .eof_i                            ( eof_o_l2                ),
+//    .data_o                           ( data_o_l3               ),
+//    .data_valid_o                     ( data_valid_o_l3         ),
+//	.sop_o                            ( sop_o_l3                ),
+//    .eop_o                            ( eop_o_l3                ),
+//    .sof_o                            ( sof_o_l3                ),
+//    .eof_o                            ( eof_o_l3                ),
+//    .ddr_fifo_rd                      ( ddr_fifo_rd[2]          ), 
+//    .ddr_fifo_afull                   ( ddr_fifo_afull[2]       )
+//);
+//
+//conv_layer
+//#(
+//    .CANCAT_OFF                       ( 0                                ),
+//    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[4]     ),            
+//    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[4]     ),
+//    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[4]    ),
+//    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[4]    ),
+//    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[4]      ),    
+//
+//    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[4]   ),
+//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[4]      ),
+//    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[6]           ), 
+//    
+//    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[4]   ),
+//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[4]    ),
+//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[4]       ),
+//    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[6]       ),
+//    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[6]      ),    
+//    .CONV_VECT_BIAS_NUM               ( 64                              ), 
+//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[4]         ),
+//    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[4]           ),
+//    
+//    .RELU_MAX_DATA                    ( RELU_MAX_DATA[4]                )
+//)
+//conv_layer_4
+//(
+//	.clk                              ( clk                     ),      
+//    .reset_n                          ( reset_n                 ),
+//	.data_i                           ( data_o_l3               ),     
+//    .data_valid_i                     ( data_valid_o_l3         ),   
+//    .sop_i                            ( sop_o_l3                ),
+//    .eop_i                            ( eop_o_l3                ),
+//    .sof_i                            ( sof_o_l3                ),
+//    .eof_i                            ( eof_o_l3                ),
+//    .data_o                           ( data_o_l4               ),
+//    .data_valid_o                     ( data_valid_o_l4         ),
+//	.sop_o                            ( sop_o_l4                ),
+//    .eop_o                            ( eop_o_l4                ),
+//    .sof_o                            ( sof_o_l4                ),
+//    .eof_o                            ( eof_o_l4                ),
+//    .ddr_fifo_rd                      ( ddr_fifo_rd[3]          ), 
+//    .ddr_fifo_afull                   ( ddr_fifo_afull[3]       )    
+//);
 
 //
-conv_layer
-#(
-    .CANCAT_OFF                       ( 0                                ),
-    .MAX_POOL_OFF                     ( 0                               ),
-    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[5]     ),            
-    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[5]     ),
-    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[5]    ),
-    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[5]    ),
-    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[5]      ),    
-
-    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[5]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[5]      ),
-    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[7]           ), 
-    
-    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[5]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[5]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[5]       ),
-    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[7]       ),
-    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[7]      ),    
-    .CONV_VECT_BIAS_NUM               ( 128                             ), 
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[5]         ),
-    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[5]           ),
-    
-    .RELU_MAX_DATA                    ( RELU_MAX_DATA[5]                )
-)
-conv_layer_5
-(
-	.clk                              ( clk                     ),      
-    .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l4               ),     
-    .data_valid_i                     ( data_valid_o_l4         ),   
-    .sop_i                            ( sop_o_l4                ),
-    .eop_i                            ( eop_o_l4                ),
-    .sof_i                            ( sof_o_l4                ),
-    .eof_i                            ( eof_o_l4                ),
-    .data_o                           ( data_o_l5               ),
-    .data_valid_o                     ( data_valid_o_l5         ),
-	.sop_o                            ( sop_o_l5                ),
-    .eop_o                            ( eop_o_l5                ),
-    .sof_o                            ( sof_o_l5                ),
-    .eof_o                            ( eof_o_l5                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[4]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[4]       )
-);
+//conv_layer
+//#(
+//    .CANCAT_OFF                       ( 0                                ),
+//    .MAX_POOL_OFF                     ( 0                               ),
+//    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[5]     ),            
+//    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[5]     ),
+//    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[5]    ),
+//    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[5]    ),
+//    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[5]      ),    
 //
-conv_layer
-#(
-    .CANCAT_OFF                       ( 0                                ),
-    .MAX_POOL_OFF                     ( 1                               ),
-    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[6]     ),            
-    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[6]     ),
-    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[6]    ),
-    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[6]    ),
-    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[6]      ),    
-
-    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[6]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[6]      ),
-    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[8]           ), 
-    
-    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[6]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[6]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[6]       ),
-    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[8]       ),
-    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[8]      ),    
-    .CONV_VECT_BIAS_NUM               ( 256                             ), 
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[6]         ),
-    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[6]           ),
-    
-    .RELU_MAX_DATA                    ( RELU_MAX_DATA[6]                )
-)
-conv_layer_6
-(
-	.clk                              ( clk                     ),      
-    .reset_n                          ( reset_n                 ),
-	.data_i                           ( data_o_l5               ),     
-    .data_valid_i                     ( data_valid_o_l5         ),   
-    .sop_i                            ( sop_o_l5                ),
-    .eop_i                            ( eop_o_l5                ),
-    .sof_i                            ( sof_o_l5                ),
-    .eof_i                            ( eof_o_l5                ),
-    .data_o                           ( data_o_l6               ),
-    .data_valid_o                     ( data_valid_o_l6         ),
-	.sop_o                            ( sop_o_l6                ),
-    .eop_o                            ( eop_o_l6                ),
-    .sof_o                            ( sof_o_l6                ),
-    .eof_o                            ( eof_o_l6                ),
-    .ddr_fifo_rd                      ( ddr_fifo_rd[5]          ), 
-    .ddr_fifo_afull                   ( ddr_fifo_afull[5]       )
-);
-
-max_pool_7
-#(
-    .DATA_WIDTH 	   ( 8                          ),
-    .CHANNEL_NUM       ( MAX_POOL_CHANNEL_NUM[6]    ),
-    .HOLD_DATA         ( MAX_POOL_HOLD_DATA[6]      ),
-    .STRING_LEN        ( STRING2MATRIX_STRING_LEN[6])
-)
-max_pool_7_inst
-(
-    .clk                 (clk),
-    .reset_n             (reset_n),
-    .sop_i               (sop_o_l6),
-    .eop_i               (eop_o_l6),
-    .sof_i               (sof_o_l6),
-    .eof_i               (eof_o_l6),
-	.valid_i             (data_valid_o_l6),
-    .data_i              (data_o_l6),
-    .data_o              (data_o      ),
-    .data_valid_o        (data_valid_o),
-    .sop_o               (sop_o       ),
-    .eop_o               (eop_o       ),
-    .sof_o               (sof_o       ),
-    .eof_o               (eof_o       )
-);
+//    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[5]   ),
+//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[5]      ),
+//    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[7]           ), 
+//    
+//    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[5]   ),
+//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[5]    ),
+//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[5]       ),
+//    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[7]       ),
+//    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[7]      ),    
+//    .CONV_VECT_BIAS_NUM               ( 128                             ), 
+//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[5]         ),
+//    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[5]           ),
+//    
+//    .RELU_MAX_DATA                    ( RELU_MAX_DATA[5]                )
+//)
+//conv_layer_5
+//(
+//	.clk                              ( clk                     ),      
+//    .reset_n                          ( reset_n                 ),
+//	.data_i                           ( data_o_l4               ),     
+//    .data_valid_i                     ( data_valid_o_l4         ),   
+//    .sop_i                            ( sop_o_l4                ),
+//    .eop_i                            ( eop_o_l4                ),
+//    .sof_i                            ( sof_o_l4                ),
+//    .eof_i                            ( eof_o_l4                ),
+//    .data_o                           ( data_o_l5               ),
+//    .data_valid_o                     ( data_valid_o_l5         ),
+//	.sop_o                            ( sop_o_l5                ),
+//    .eop_o                            ( eop_o_l5                ),
+//    .sof_o                            ( sof_o_l5                ),
+//    .eof_o                            ( eof_o_l5                ),
+//    .ddr_fifo_rd                      ( ddr_fifo_rd[4]          ), 
+//    .ddr_fifo_afull                   ( ddr_fifo_afull[4]       )
+//);
+//
+//conv_layer
+//#(
+//    .CANCAT_OFF                       ( 0                                ),
+//    .MAX_POOL_OFF                     ( 1                               ),
+//    .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[6]     ),            
+//    .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[6]     ),
+//    .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[6]    ),
+//    .STRING2MATRIX_CHANNEL_NUM        ( STRING2MATRIX_CHANNEL_NUM[6]    ),
+//    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[6]      ),    
+//
+//    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[6]   ),
+//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[6]      ),
+//    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[8]           ), 
+//    
+//    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[6]   ),
+//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[6]    ),
+//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[6]       ),
+//    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[8]       ),
+//    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[8]      ),    
+//    .CONV_VECT_BIAS_NUM               ( 256                             ), 
+//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[6]         ),
+//    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[6]           ),
+//    
+//    .RELU_MAX_DATA                    ( RELU_MAX_DATA[6]                )
+//)
+//conv_layer_6
+//(
+//	.clk                              ( clk                     ),      
+//    .reset_n                          ( reset_n                 ),
+//	.data_i                           ( data_o_l5               ),     
+//    .data_valid_i                     ( data_valid_o_l5         ),   
+//    .sop_i                            ( sop_o_l5                ),
+//    .eop_i                            ( eop_o_l5                ),
+//    .sof_i                            ( sof_o_l5                ),
+//    .eof_i                            ( eof_o_l5                ),
+//    .data_o                           ( data_o_l6               ),
+//    .data_valid_o                     ( data_valid_o_l6         ),
+//	.sop_o                            ( sop_o_l6                ),
+//    .eop_o                            ( eop_o_l6                ),
+//    .sof_o                            ( sof_o_l6                ),
+//    .eof_o                            ( eof_o_l6                ),
+//    .ddr_fifo_rd                      ( ddr_fifo_rd[5]          ), 
+//    .ddr_fifo_afull                   ( ddr_fifo_afull[5]       )
+//);
+//
+//max_pool_7
+//#(
+//    .DATA_WIDTH 	   ( 8                          ),
+//    .CHANNEL_NUM       ( MAX_POOL_CHANNEL_NUM[6]    ),
+//    .HOLD_DATA         ( MAX_POOL_HOLD_DATA[6]      ),
+//    .STRING_LEN        ( STRING2MATRIX_STRING_LEN[6])
+//)
+//max_pool_7_inst
+//(
+//    .clk                 (clk),
+//    .reset_n             (reset_n),
+//    .sop_i               (sop_o_l6),
+//    .eop_i               (eop_o_l6),
+//    .sof_i               (sof_o_l6),
+//    .eof_i               (eof_o_l6),
+//	.valid_i             (data_valid_o_l6),
+//    .data_i              (data_o_l6),
+//    .data_o              (data_o      ),
+//    .data_valid_o        (data_valid_o),
+//    .sop_o               (sop_o       ),
+//    .eop_o               (eop_o       ),
+//    .sof_o               (sof_o       ),
+//    .eof_o               (eof_o       )
+//);
+/////////////////////////////////////////////////////////////////////////////////////////////
 /*
 assign data_o       = data_o_l7      ;
 assign data_valid_o = data_valid_o_l7;
