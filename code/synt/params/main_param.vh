@@ -26,7 +26,7 @@ parameter string CONV_VECT_BIAS_INI_FILE[9]     = '{"bias_0.txt","bias_1.txt",
                                                                     "bias_2.txt","bias_3.txt",
                                                                                         "bias_4.txt","bias_5.txt",
                                                                                                          "bias_6.txt","bias_7.txt","bias_8.txt"} ;                                       
-parameter  integer MAX_POOL_CHANNEL_NUM[7]              = '{16 ,16 ,     16,     32,     64,     128,    256};
+parameter  integer MAX_POOL_CHANNEL_NUM[7]              = '{16 ,8/*16*/ ,     16,     32,     64,     128,    256};
 parameter  integer MAX_POOL_HOLD_DATA[7]                = '{16 ,16 ,     32,     32,     64,     128,    256};
 parameter  integer RELU_MAX_DATA[7]                     = '{127,127,     127,    127,    127,    127,    127}/*2541*/           ;
 

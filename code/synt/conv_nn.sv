@@ -156,7 +156,7 @@ conv_layer
 #(
     .NUMBER_SPLITTED_CHANNELS         ( 2                                ),
     .CANCAT_OFF                       ( 1                                ),
-    .MAX_POOL_OFF                     ( 1                               ),
+    .MAX_POOL_OFF                     ( 0                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[1]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[1]    ),
@@ -247,7 +247,7 @@ conv_layer
 #(
     .NUMBER_SPLITTED_CHANNELS         ( 2                                ),
     .CANCAT_OFF                       ( 1                                ),
-    .MAX_POOL_OFF                     ( 1                               ),
+    .MAX_POOL_OFF                     ( 0                               ),
     .STRING2MATRIX_DATA_WIDTH         ( STRING2MATRIX_DATA_WIDTH[1]     ),            
     .STRING2MATRIX_STRING_LEN         ( STRING2MATRIX_STRING_LEN[1]     ),
     .STRING2MATRIX_MATRIX_SIZE        ( STRING2MATRIX_MATRIX_SIZE[1]    ),
@@ -263,6 +263,7 @@ conv_layer
     .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[3]       ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[3]      ),
+    .CONV_VECT_BIAS_NUM               ( 8                              ),
     .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[1]           ),
     
@@ -287,29 +288,61 @@ conv_layer_r1
     .ddr_fifo_rd                      ( /*ddr_fifo_rd[1]*/          ), 
     .ddr_fifo_afull                   ( /*ddr_fifo_afull[1]  */     )
 );
+
 //
-concat_channels 
+/*
+logic [DATA_WIDTH-1:0] test[1:0];        
+assign test[0] = data_o_lr1;
+assign test[1] = data_o_ll1;
+*/
+
+concat_channels
 #(
-   .DATA_WIDTH      ( DATA_WIDTH )
+    .DATA_WIDTH                    ( 8 ),
+    .NUMBER_CONCAT_CHANNELS        ( 2 ),
+    .CHANNEL_NUM                   ( 16 )
 )
 concat_channels_lr
 (
-	.clk                              ( clk                 ),
-    .reset_n                          ( reset_n             ),
-    .data_valid_i                     ( data_valid_o_lr1    ),
-	.data_li                          ( data_o_ll1          ),
-	.data_ri                          ( data_o_lr1          ),
-    .sop_i                            ( sop_o_lr1           ),
-    .eop_i                            ( eop_o_lr1           ),
-    .sof_i                            ( sof_o_lr1           ),
-    .eof_i                            ( eof_o_lr1           ),
-    .data_o                           ( data_o_l1           ),
-    .data_valid_o                     ( data_valid_o_l1     ),
-	.sop_o                            ( sop_o_l1            ),
-    .eop_o                            ( eop_o_l1            ),
-    .sof_o                            ( sof_o_l1            ),
-    .eof_o                            ( eof_o_l1            )
+    .clk                       ( clk                    ), 
+    .reset_n                   ( reset_n                ),
+    .data_valid_i              ( data_valid_o_lr1 ),
+    .data_i                    ( /*test*/{data_o_lr1,data_o_ll1}        ),
+    .sop_i                     ( sop_o_lr1        ),
+    .eop_i                     ( eop_o_lr1        ),
+    .sof_i                     ( sof_o_lr1        ),
+    .eof_i                     ( eof_o_lr1        ),
+    .data_o                    ( data_o                 ),
+    .data_valid_o              ( data_valid_o           ),
+    .sop_o                     ( sop_o                  ),
+    .eop_o                     ( eop_o                  ),
+    .sof_o                     ( sof_o                  ),
+    .eof_o                     ( eof_o                  )
 );
+
+//
+//concat_channels 
+//#(
+//   .DATA_WIDTH      ( DATA_WIDTH )
+//)
+//concat_channels_lr
+//(
+//	.clk                              ( clk                 ),
+//    .reset_n                        ( reset_n             ),
+//    .data_valid_i                   ( data_valid_o_lr1    ),
+//	.data_li                          ( data_o_ll1          ),
+//	.data_ri                          ( data_o_lr1          ),
+//    .sop_i                          ( sop_o_lr1           ),
+//    .eop_i                          ( eop_o_lr1           ),
+//    .sof_i                          ( sof_o_lr1           ),
+//    .eof_i                          ( eof_o_lr1           ),
+//    .data_o                         ( data_o_l1           ),
+//    .data_valid_o                   ( data_valid_o_l1     ),
+//	.sop_o                            ( sop_o_l1            ),
+//    .eop_o                          ( eop_o_l1            ),
+//    .sof_o                          ( sof_o_l1            ),
+//    .eof_o                          ( eof_o_l1            )
+//);
 //
 conv_layer
 #(

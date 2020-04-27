@@ -43,7 +43,7 @@ module ROM
                 for ( int i=THIS_CHANNEL_NUMBER*CHANNEL_NUM; i<MEM_DEPTH*NUMBER_SPLITTED_CHANNELS;i=i+CHANNEL_NUM*NUMBER_SPLITTED_CHANNELS )
                     for ( int j=0; j<CHANNEL_NUM; j++ )
                         begin
-                            $display("%m i+j=%0d cnt=%0d i=%0d, j=%0d, MEM_DEPTH=%0d, THIS_CHANNEL_NUMBER*CHANNEL_NUM=%0d",i+j,cnt,i,j,MEM_DEPTH,THIS_CHANNEL_NUMBER*CHANNEL_NUM);
+                        //    $display("%m i+j=%0d cnt=%0d i=%0d, j=%0d, MEM_DEPTH=%0d, THIS_CHANNEL_NUMBER*CHANNEL_NUM=%0d",i+j,cnt,i,j,MEM_DEPTH,THIS_CHANNEL_NUMBER*CHANNEL_NUM);
                             rom[cnt] = tmp_rom[i+j];
                             cnt++;
                         end
