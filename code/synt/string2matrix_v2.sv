@@ -546,9 +546,9 @@ int cnt_wr=0;
 int cnt_rd=0;
     always @(posedge clk)   
         begin
-            assert ( !fifo_full[0] ) else begin $error("FIFO 0 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
-            assert ( !fifo_full[1] ) else begin $error("FIFO 1 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
-            assert ( !fifo_full[2] ) else begin $error("FIFO 2 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
+            assert ( !fifo_full[0] ) else begin $error("%m FIFO 0 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
+            assert ( !fifo_full[1] ) else begin $error("%m FIFO 1 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
+            assert ( !fifo_full[2] ) else begin $error("%m FIFO 2 FULL!!!, STRING_LEN - %d",STRING_LEN); $stop; end; 
         end
     
 always @(posedge fifo_wr_ )

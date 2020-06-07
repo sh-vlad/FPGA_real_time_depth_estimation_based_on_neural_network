@@ -307,7 +307,7 @@ concat_channels_lr
     .clk                       ( clk                    ), 
     .reset_n                   ( reset_n                ),
     .data_valid_i              ( data_valid_o_lr1 ),
-    .data_i                    ( /*test*/{data_o_lr1,data_o_ll1}        ),
+    .data_i                    ( /*test*/'{data_o_ll1,data_o_lr1}        ),
     .sop_i                     ( sop_o_lr1        ),
     .eop_i                     ( eop_o_lr1        ),
     .sof_i                     ( sof_o_lr1        ),

@@ -74,7 +74,7 @@ always_ff @( posedge clk or negedge reset_n )
         for ( int i=0; i<2; i++ )
             sh_cnt_number[i] <= '0;
     else
-        sh_cnt_number <= {sh_cnt_number[0],cnt_number};
+        sh_cnt_number <= '{sh_cnt_number[0],cnt_number};
             
 
 always_ff @( posedge clk or negedge reset_n )
@@ -91,7 +91,7 @@ always_ff @( posedge clk or negedge reset_n )
         for ( int i=0; i<2; i++ )
             sh_cnt_concat_number[i] <= '0;
     else
-        sh_cnt_concat_number <= {sh_cnt_concat_number[0],cnt_concat_number};
+        sh_cnt_concat_number <= '{sh_cnt_concat_number[0],cnt_concat_number};
 
 genvar i_gen;        
 generate   
