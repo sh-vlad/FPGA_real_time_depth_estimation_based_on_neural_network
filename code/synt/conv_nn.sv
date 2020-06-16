@@ -117,16 +117,16 @@ conv_layer
     .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[0]       ),
     
     .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[0]    ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[0]       ),
+    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[0]       ),
     .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[0]            ), 
     
     .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[0]    ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
+    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
+    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[0]        ),
-//    .CONV_VECT_BIAS_NUM               ( 8                              ),  
+//    //.CONV_VECT_BIAS_NUM               ( 8                              ),  
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[0]      ),
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
+    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[0]            ),
     
     .RELU_MAX_DATA                    ( RELU_MAX_DATA[0]                 )
@@ -164,16 +164,16 @@ conv_layer
     .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[1]      ),    
 
     .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[1]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[1]      ),
+    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[1]      ),
     .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[1]           ), 
     
     .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[1]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[1]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
+    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[1]    ),
+    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[1]       ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[1]      ),
-    .CONV_VECT_BIAS_NUM               ( 8                              ),    
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
+    //.CONV_VECT_BIAS_NUM               ( 8                              ),    
+    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[1]           ),
     
     .RELU_MAX_DATA                    ( RELU_MAX_DATA[1]                )
@@ -210,15 +210,15 @@ conv_layer
     .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[0]       ),
     
     .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[0]    ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[0]       ),
+    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[0]       ),
     .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[2]            ), 
     
     .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[0]    ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
+    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[0]     ),
+    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[0]        ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[2]        ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[2]      ),
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
+    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[0]          ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[0]            ),
     
     .RELU_MAX_DATA                    ( RELU_MAX_DATA[0]                 )
@@ -255,16 +255,16 @@ conv_layer
     .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[1]      ),    
 
     .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[1]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[1]      ),
+    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[1]      ),
     .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[3]           ), 
     
     .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[1]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[1]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
+    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[1]    ),
+    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[1]       ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[3]       ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[3]      ),
-    .CONV_VECT_BIAS_NUM               ( 8                              ),
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
+    //.CONV_VECT_BIAS_NUM               ( 8                              ),
+    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[1]         ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[1]           ),
     
     .RELU_MAX_DATA                    ( RELU_MAX_DATA[1]                )
@@ -354,15 +354,15 @@ conv_layer
     .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[2]      ),    
 
     .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[2]   ),
-    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[2]      ),
+    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[2]      ),
     .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[4]           ), 
     
     .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[2]   ),
-    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[2]    ),
-    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[2]       ),
+    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[2]    ),
+    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[2]       ),
     .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[4]       ),
     .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[4]      ),    
-    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[2]         ),
+    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[2]         ),
     .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[2]           ),
     
     .RELU_MAX_DATA                    ( RELU_MAX_DATA[2]                )
@@ -397,16 +397,16 @@ conv_layer_2
 //    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[3]      ),    
 //
 //    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[3]   ),
-//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[3]      ),
+//    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[3]      ),
 //    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[5]           ), 
 //    
 //    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[3]   ),
-//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[3]    ),
-//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[3]       ),
+//    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[3]    ),
+//    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[3]       ),
 //    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[5]       ),
 //    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[5]      ),    
-//    .CONV_VECT_BIAS_NUM               ( 32                              ),    
-//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[3]         ),
+//    //.CONV_VECT_BIAS_NUM               ( 32                              ),    
+//    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[3]         ),
 //    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[3]           ),
 //    
 //    .RELU_MAX_DATA                    ( RELU_MAX_DATA[3]                )
@@ -441,16 +441,16 @@ conv_layer_2
 //    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[4]      ),    
 //
 //    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[4]   ),
-//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[4]      ),
+//    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[4]      ),
 //    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[6]           ), 
 //    
 //    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[4]   ),
-//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[4]    ),
-//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[4]       ),
+//    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[4]    ),
+//    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[4]       ),
 //    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[6]       ),
 //    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[6]      ),    
-//    .CONV_VECT_BIAS_NUM               ( 64                              ), 
-//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[4]         ),
+//    //.CONV_VECT_BIAS_NUM               ( 64                              ), 
+//    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[4]         ),
 //    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[4]           ),
 //    
 //    .RELU_MAX_DATA                    ( RELU_MAX_DATA[4]                )
@@ -487,16 +487,16 @@ conv_layer_2
 //    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[5]      ),    
 //
 //    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[5]   ),
-//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[5]      ),
+//    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[5]      ),
 //    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[7]           ), 
 //    
 //    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[5]   ),
-//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[5]    ),
-//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[5]       ),
+//    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[5]    ),
+//    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[5]       ),
 //    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[7]       ),
 //    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[7]      ),    
-//    .CONV_VECT_BIAS_NUM               ( 128                             ), 
-//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[5]         ),
+//    //.CONV_VECT_BIAS_NUM               ( 128                             ), 
+//    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[5]         ),
 //    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[5]           ),
 //    
 //    .RELU_MAX_DATA                    ( RELU_MAX_DATA[5]                )
@@ -532,16 +532,16 @@ conv_layer_2
 //    .STRING2MATRIX_HOLD_DATA          ( STRING2MATRIX_HOLD_DATA[6]      ),    
 //
 //    .CONV2_3X3_WRP_KERNEL_WIDTH       ( CONV2_3X3_WRP_KERNEL_WIDTH[6]   ),
-//    .CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[6]      ),
+//    //.CONV2_3X3_WRP_MEM_DEPTH          ( CONV2_3X3_WRP_MEM_DEPTH[6]      ),
 //    .CONV2_3X3_INI_FILE               ( CONV2_3X3_INI_FILE[8]           ), 
 //    
 //    .CONV_VECT_SER_KERNEL_WIDTH       ( CONV_VECT_SER_KERNEL_WIDTH[6]   ),
-//    .CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[6]    ),
-//    .CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[6]       ),
+//    //.CONV_VECT_SER_CHANNEL_NUM        ( CONV_VECT_SER_CHANNEL_NUM[6]    ),
+//    //.CONV_VECT_SER_MTRX_NUM           ( CONV_VECT_SER_MTRX_NUM[6]       ),
 //    .CONV_VECT_SER_INI_FILE           ( CONV_VECT_SER_INI_FILE[8]       ),
 //    .CONV_VECT_BIAS_INI_FILE          ( CONV_VECT_BIAS_INI_FILE[8]      ),    
-//    .CONV_VECT_BIAS_NUM               ( 256                             ), 
-//    .MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[6]         ),
+//    //.CONV_VECT_BIAS_NUM               ( 256                             ), 
+//    //.MAX_POOL_CHANNEL_NUM             ( MAX_POOL_CHANNEL_NUM[6]         ),
 //    .MAX_POOL_HOLD_DATA               ( MAX_POOL_HOLD_DATA[6]           ),
 //    
 //    .RELU_MAX_DATA                    ( RELU_MAX_DATA[6]                )

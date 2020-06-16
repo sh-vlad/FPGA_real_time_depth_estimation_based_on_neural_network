@@ -236,7 +236,7 @@ RAM_inst
 
         
 always @( posedge clk )
-    fifo_wr <= /*~sh_line_mark & sh_row_mark & sh_valid[0]*/(row_wind_cnt == WINDOW_SIZE-1);
+    fifo_wr <= /*~sh_line_mark & sh_row_mark & sh_valid[0]*/(row_wind_cnt == WINDOW_SIZE-1) && valid_i;
 
 assign fifo_rd = line_mark & !row_mark & valid_i;
     

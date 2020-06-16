@@ -18,29 +18,30 @@ module conv_layer
     parameter STRING2MATRIX_HOLD_DATA           = 16,
 //    
     //parameter MATRIX_PARALLEL2SERIAL_DATA_WIDTH = 8, 
-    parameter MATRIX_PARALLEL2SERIAL_BUS_NUM    = 9,
-    parameter MATRIX_PARALLEL2SERIAL_MTRX_NUM_I = 3,
-    parameter MATRIX_PARALLEL2SERIAL_MTRX_NUM_O = 1,
+//    parameter MATRIX_PARALLEL2SERIAL_BUS_NUM    = 9,
+//    parameter MATRIX_PARALLEL2SERIAL_MTRX_NUM_I = 3,
+//    parameter MATRIX_PARALLEL2SERIAL_MTRX_NUM_O = 1,
 //    parameter MATRIX_PARALLEL2SERIAL_DATA_HOLD  = 16,    
 //
 //    parameter CONV2_3X3_WRP_DATA_WIDTH          = 8, 
 //    parameter CONV2_3X3_WRP_KERNEL_NUM          = 3,
     parameter CONV2_3X3_WRP_KERNEL_WIDTH        = 8,
-    parameter CONV2_3X3_WRP_MEM_DEPTH           = 3,
+//    parameter CONV2_3X3_WRP_MEM_DEPTH           = 3,
     parameter CONV2_3X3_INI_FILE/*[CONV2_3X3_WRP_KERNEL_NUM]*/= "",//      = '{"rom_init_0.txt","rom_init_0.txt","rom_init_0.txt"},//'{""},
 //
 //    parameter CONV_VECT_SER_DATA_WIDTH          = 8,               
     parameter CONV_VECT_SER_KERNEL_WIDTH        = 8,               
-    parameter CONV_VECT_SER_CHANNEL_NUM         = 16,              
-    parameter CONV_VECT_SER_MTRX_NUM            = 3,               
-    parameter CONV_VECT_SER_HOLD_DATA           = 8,               
+//    parameter CONV_VECT_SER_CHANNEL_NUM         = 16,              
+//    parameter CONV_VECT_SER_MTRX_NUM            = 3,               
+//    parameter CONV_VECT_SER_HOLD_DATA           = 8,               
     parameter CONV_VECT_SER_INI_FILE            = "rom_init.txt",
     parameter CONV_VECT_BIAS_INI_FILE           = "rom_init.txt",
-    parameter CONV_VECT_BIAS_NUM                = 16,
+//    parameter CONV_VECT_BIAS_NUM                = 16,
 //
 //    parameter MAX_POOL_DATA_WIDTH               = 8, 
-    parameter MAX_POOL_CHANNEL_NUM              = 3,
+//    parameter MAX_POOL_CHANNEL_NUM              = 3,
     parameter MAX_POOL_HOLD_DATA                = 16,
+    parameter MAX_POOL_WINDOW_SIZE              = 2,
 //
 //    parameter RELU_DATA_WIDTH                   = 8,
     parameter RELU_MAX_DATA                     = 254   
@@ -65,7 +66,12 @@ module conv_layer
     input wire                                          ddr_fifo_rd,
     output reg                                          ddr_fifo_afull
 );
+parameter CONV_VECT_SER_CHANNEL_NUM = STRING2MATRIX_HOLD_DATA;
+parameter CONV2_3X3_WRP_MEM_DEPTH = STRING2MATRIX_CHANNEL_NUM;
+parameter CONV_VECT_SER_MTRX_NUM = STRING2MATRIX_CHANNEL_NUM;
+parameter MAX_POOL_CHANNEL_NUM = STRING2MATRIX_HOLD_DATA;
 
+parameter CONV_VECT_BIAS_NUM = MAX_POOL_HOLD_DATA;
 /*
 localparam CONV2_3X3_WRP_DATA_WIDTH = STRING2MATRIX_DATA_WIDTH*CONV2_3X3_WRP_KERNEL_WIDTH+8;
 localparam CONV_VECT_SER_DATA_WIDTH = CONV2_3X3_WRP_DATA_WIDTH*CONV_VECT_SER_KERNEL_WIDTH+CONV_VECT_SER_MTRX_NUM;
@@ -140,14 +146,14 @@ wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   eop_conv_v
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   sof_conv_vect_ser;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   eof_conv_vect_ser;
 //
-wire signed [MAX_POOL_DATA_WIDTH-1:0]   data_ReLu[NUMBER_SPLITTED_CHANNELS];
+wire  [MAX_POOL_DATA_WIDTH-1:0]   data_ReLu[NUMBER_SPLITTED_CHANNELS];
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   data_ReLu_valid;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   sop_ReLu;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   eop_ReLu;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   sof_ReLu;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   eof_ReLu;
 //
-wire signed [MAX_POOL_DATA_WIDTH-1:0]   data_max_pool[NUMBER_SPLITTED_CHANNELS];
+wire  [MAX_POOL_DATA_WIDTH-1:0]   data_max_pool[NUMBER_SPLITTED_CHANNELS];
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   data_max_pool_valid;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   sop_max_pool;
 wire [NUMBER_SPLITTED_CHANNELS-1:0]                                   eop_max_pool;
@@ -285,12 +291,14 @@ generate
         //    generate
                 for (/*genvar*/ mp_gen = 0; mp_gen < NUMBER_SPLITTED_CHANNELS; mp_gen++)
                     begin: MAX_POOL_GEN        
-                        max_pool 
+                        //max_pool 
+                       max_pool_pro_2
                         #(
                             .DATA_WIDTH       ( MAX_POOL_DATA_WIDTH         ),
                             .CHANNEL_NUM      ( MAX_POOL_CHANNEL_NUM        ),
                             .HOLD_DATA        ( MAX_POOL_HOLD_DATA          ),
-                            .STRING_LEN       ( MAX_POOL_STRING_LEN         )
+                            .STRING_LEN       ( MAX_POOL_STRING_LEN         ),
+                            .WINDOW_SIZE      ( MAX_POOL_WINDOW_SIZE        )
                         )
                         max_pool_inst
                         (

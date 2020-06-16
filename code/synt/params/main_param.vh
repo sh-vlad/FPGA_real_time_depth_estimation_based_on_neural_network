@@ -9,15 +9,15 @@ parameter  integer STRING2MATRIX_CHANNEL_NUM [7]        = '{3  ,16 ,     32,    
 parameter  integer STRING2MATRIX_HOLD_DATA   [7]        = '{16 ,8/*16*/ ,     16,     32,     64,     128,    256};
 //                                       
 parameter  integer CONV2_3X3_WRP_KERNEL_WIDTH[7]        = '{8,  8  ,      8,      8,      8,      8,      8};
-parameter  integer CONV2_3X3_WRP_MEM_DEPTH[7]           = '{3,  16,      32,     16,     32,     64,     128};
+//parameter  integer CONV2_3X3_WRP_MEM_DEPTH[7]           = '{3,  16,      32,     16,     32,     64,     128};
 parameter string CONV2_3X3_INI_FILE [9]        = '{"conv20.txt","conv21.txt",
                                                                         "conv22.txt","conv23.txt",
                                                                                         "conv24.txt","conv25.txt",
                                                                                                         "conv26.txt","conv27.txt","conv28.txt"};          
                                            
 parameter  integer CONV_VECT_SER_KERNEL_WIDTH[7]        = '{8 , 8 ,      8,      8,      8,      8,      8};
-parameter  integer CONV_VECT_SER_CHANNEL_NUM[7]         = '{16, 8/*16*/,      16,     32,     64,     128,    256};
-parameter  integer CONV_VECT_SER_MTRX_NUM[7]            = '{3 , 16,      32,     16,     32,     64,     128};
+//parameter  integer CONV_VECT_SER_CHANNEL_NUM[7]         = '{16, 8/*16*/,      16,     32,     64,     128,    256};
+//parameter  integer CONV_VECT_SER_MTRX_NUM[7]            = '{3 , 16,      32,     16,     32,     64,     128};
 parameter string CONV_VECT_SER_INI_FILE[9]     = '{"conv_vect0.txt","conv_vect1.txt",
                                                                     "conv_vect2.txt","conv_vect3.txt",
                                                                                         "conv_vect4.txt","conv_vect5.txt"
@@ -27,7 +27,7 @@ parameter string CONV_VECT_BIAS_INI_FILE[9]     = '{"bias_0.txt","bias_1.txt",
                                                                                         "bias_4.txt","bias_5.txt",
                                                                                                          "bias_6.txt","bias_7.txt","bias_8.txt"} ;  
 //parameter  integer CONV_VECT_BIAS_NUM[7]                =                                                                                                         
-parameter  integer MAX_POOL_CHANNEL_NUM[7]              = '{16 ,8/*16*/ ,     16,     32,     64,     128,    256};
+//parameter  integer MAX_POOL_CHANNEL_NUM[7]              = '{16 ,8/*16*/ ,     16,     32,     64,     128,    256};
 parameter  integer MAX_POOL_HOLD_DATA[7]                = '{16 ,16 ,     32,     32,     64,     128,    256};
 parameter  integer RELU_MAX_DATA[7]                     = '{127,127,     127,    127,    127,    127,    127}/*2541*/           ;
 
@@ -52,7 +52,7 @@ localparam MAX_POOL_DATA_WIDTH = RELU_DATA_WIDTH;
 */
 
 //parameter [1:0] MAX_POOL_STRING_LEN;
-
+parameter integer CONV_VECT_SER_MTRX_NUM[7] = STRING2MATRIX_CHANNEL_NUM;
 parameter integer MAX_POOL_STRING_LEN[7]      = '{ STRING2MATRIX_STRING_LEN[0], STRING2MATRIX_STRING_LEN[1], STRING2MATRIX_STRING_LEN[2],
                                                   STRING2MATRIX_STRING_LEN[3],STRING2MATRIX_STRING_LEN[4], STRING2MATRIX_STRING_LEN[5], STRING2MATRIX_STRING_LEN[6]};
 parameter integer CONV2_3X3_WRP_DATA_WIDTH[7] = '{ STRING2MATRIX_DATA_WIDTH[0], STRING2MATRIX_DATA_WIDTH[1], STRING2MATRIX_DATA_WIDTH[2],
