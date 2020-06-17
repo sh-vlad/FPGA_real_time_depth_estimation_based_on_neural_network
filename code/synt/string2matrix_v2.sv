@@ -64,7 +64,7 @@ module string2matrix_v2
     
     
 	reg		[$clog2(CHANNEL_NUM):0]				padding_cnt;
-	reg		[3:0]									start;
+	reg		[$clog2(CHANNEL_NUM):0]									start;
 	reg												padding_wr;
     reg                                             second_padding;
     logic   [$clog2(STRING_LEN)-1:0]                eop_cnt;
@@ -90,8 +90,10 @@ module string2matrix_v2
 	always@ (posedge clk or negedge reset_n )
 		if ( !reset_n )
 			start <= '0;
-		else 
-			if ( start < 15 || padding_flag ||/*padding_flag*/eop_i || (second_padding && padding_cnt == CHANNEL_NUM) )
+		else
+            if ( eop_i || (second_padding && padding_cnt == CHANNEL_NUM)|| padding_flag)
+                start <= '0;
+			else if ( start < CHANNEL_NUM+2/*31*/  /*||padding_flag*/ )
 				start <= start + 1'h1;
 			
 		
@@ -101,7 +103,7 @@ module string2matrix_v2
 		else
             if ( padding_cnt == CHANNEL_NUM )
                 padding_cnt <= '0;
-            else if ( start == 4'd14 )
+            else if ( start == CHANNEL_NUM+1 )
                 padding_cnt <= 1;
             else if ( padding_cnt != 0 )
                 padding_cnt <= padding_cnt + 1;

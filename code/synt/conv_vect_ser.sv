@@ -44,7 +44,11 @@ reg [$clog2(MTRX_NUM)-1:0]                          mtrx_cnt;
 wire  signed [KERNEL_WIDTH-1:0]                     kernel;
 reg   signed[KERNEL_WIDTH-1:0]                      sh_kernel;
 reg  signed[DATA_WIDTH-1:0]                         sh_data[1:0];
-reg [$clog2(CHANNEL_NUM)-1:0]                       sh_rom_addr[4:0];   
+reg [$clog2(CHANNEL_NUM*MTRX_NUM)-1:0]                       sh_rom_addr[4:0];   
+//
+reg [$clog2(CHANNEL_NUM)-1:0]                       ram_addr;   
+reg [$clog2(CHANNEL_NUM)-1:0]                       sh_ram_addr[3:0];  
+//
 //reg [$clog2(HOLD_DATA):0]                   hold_data_cnt;
 reg [1:0]                                           hold_data_start;
 reg [2:0]                                           fifo_wr;
@@ -56,13 +60,13 @@ reg     [$clog2(STRING_LEN*CHANNEL_NUM)-1:0]        out_cnt;
 reg                                                 work;
 reg [3:0]                                           fifo_acc_wr;
 reg [2:0]                                           fifo_acc_rd;
-reg                                                 sh_valid_i;
+reg [2:0]                                           sh_valid_i;
 reg  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   summ;
 reg  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]            fifo_out;
 logic  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]          fifo_in;
 
 always @( posedge clk )
-    sh_valid_i <= valid_i;
+    sh_valid_i <= {sh_valid_i[1:0],valid_i};
 
 always @( posedge clk )
     begin
@@ -87,14 +91,31 @@ always @( posedge clk or negedge reset_n )
             rom_addr <= '0;
         else if ( valid_i )
             rom_addr <= rom_addr + 1'h1;
+//            
+always @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        ram_addr <= '0;
+    else
+        if ( ram_addr == (CHANNEL_NUM)-1 )
+            ram_addr <= '0;
+        else if ( sh_valid_i[0] )
+            ram_addr <= ram_addr + 1'h1;            
 
+always @( posedge clk )
+    sh_ram_addr <= {sh_ram_addr[2:0],ram_addr};
+            
+//
+wire [31:0] mod_test_0;
+assign mod_test_0 = sh_rom_addr[1]%(CHANNEL_NUM);
+
+//
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
         mtrx_cnt <= '0;
     else
-        if ( /*( rom_addr == CHANNEL_NUM-1 ) &&*/ (mtrx_cnt == MTRX_NUM-1) && sh_rom_addr[1]==CHANNEL_NUM-1/**/ )
+        if ( /*( rom_addr == CHANNEL_NUM-1 ) &&*/ (mtrx_cnt == MTRX_NUM-1) && sh_ram_addr[1]==CHANNEL_NUM-1 )
             mtrx_cnt <= '0;
-        else if ( valid_i && (sh_rom_addr[1] == CHANNEL_NUM-1) )
+        else if ( /*valid_i*/sh_valid_i[2] && (sh_ram_addr[1] == CHANNEL_NUM-1) )
             mtrx_cnt <= mtrx_cnt + 1'h1;
 
 always @( posedge clk )
@@ -142,7 +163,7 @@ always @( posedge clk )
     ram_in <= !mtrx_cnt_zero_it ? mult_it[0]:ram_out + mult_it[0];
     
 always @( posedge clk )
-    test_ram_in <= !sh_mtrx_cnt_zero_it ? mult_it[0]:sh_ram_out + mult_it[0];
+    test_ram_in <= !mtrx_cnt_zero_it/*!sh_mtrx_cnt_zero_it*/ ? mult_it[0]:sh_ram_out + mult_it[0];
 RAM
 #(
     .DATA_WIDTH     ( KERNEL_WIDTH+DATA_WIDTH   ), 
@@ -152,8 +173,8 @@ RAM
 RAM_inst
 (
     .data           ( test_ram_in            ),
-    .read_addr      ( sh_rom_addr[1]    ),
-    .write_addr     ( sh_rom_addr[4]    ),
+    .read_addr      ( sh_ram_addr[0]/*sh_rom_addr[1]*/    ),
+    .write_addr     ( sh_ram_addr[3]/*sh_rom_addr[4]*/    ),
     .we             ( 1'h1              ),
     .clk            ( clk               ),
     .q              ( ram_out           )
@@ -351,7 +372,7 @@ always_ff @( posedge clk or negedge reset_n )
     else
         if ( bias_addr == BIAS_NUM-1)
             bias_addr <= 0;
-        else if (data_valid_it[0])
+        else if (/*data_valid_it[0]*/fifo_wr[0])
             bias_addr <= bias_addr + 1'h1;
 
 wire signed [BIAS_WIDTH-1:0] bias;            
@@ -372,12 +393,17 @@ ROM_bias_init
     .q                      ( bias                )
 );
 
-
-
+logic signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   data_pipe;
+/*
 always @( posedge clk )
     data_o <= test_ram_in + bias;
 //    data_o <= accum[sh_rom_addr[3]];
-           
+*/  
+always @( posedge clk )
+    begin
+        data_pipe <= test_ram_in + bias;
+        data_o <= data_pipe;
+    end
 always @( posedge clk or negedge reset_n ) 
     if ( !reset_n )
         data_valid_it[0] <= 0;
