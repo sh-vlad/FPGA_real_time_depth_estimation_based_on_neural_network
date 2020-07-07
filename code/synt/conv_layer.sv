@@ -330,16 +330,16 @@ generate
         end
     else if ( MAX_POOL_OFF == 1 )
         begin: not_max_pool_gen
-            assign data_o       = data_ReLu[0]      ;
-            assign data_valid_o = data_ReLu_valid[0] ;
-            assign sop_o        = sop_ReLu[0]        ;
-            assign eop_o        = eop_ReLu[0]        ;
-            assign sof_o        = sof_ReLu[0]        ;
-            assign eof_o        = eof_ReLu[0]        ;
+            assign data_max_pool       = data_ReLu      ;
+            assign data_max_pool_valid = data_ReLu_valid ;
+            assign sop_max_pool        = sop_ReLu        ;
+            assign eop_max_pool        = eop_ReLu        ;
+            assign sof_max_pool        = sof_ReLu        ;
+            assign eof_max_pool        = eof_ReLu        ;
         end
 endgenerate 
 
-
+/*
 generate
     if ( CANCAT_OFF == 0 )
         begin: cancat_gen
@@ -388,7 +388,7 @@ generate
                     ddr_fifo_afull <= ( wrusedw >= (STRING2MATRIX_STRING_LEN*MAX_POOL_CHANNEL_NUM)/2 ) ? 1'h1: 1'h0;
         end
 endgenerate
-
+*/
 
 generate
     if ( NUMBER_SPLITTED_CHANNELS > 1 )
@@ -396,19 +396,19 @@ generate
             concat_channels
             #(
                 .DATA_WIDTH                    ( 8 ),
-                .NUMBER_CONCAT_CHANNELS        ( 2 ),
-                .CHANNEL_NUM                   ( 8 )
+                .NUMBER_CONCAT_CHANNELS        ( NUMBER_SPLITTED_CHANNELS ),
+                .CHANNEL_NUM                   ( STRING2MATRIX_HOLD_DATA/*/NUMBER_SPLITTED_CHANNELS*/ )
             )
             concat_channels_inst
             (
                 .clk                       ( clk                    ), 
                 .reset_n                   ( reset_n                ),
                 .data_valid_i              ( data_max_pool_valid[0] ),
-                .data_i                    ( data_max_pool      ),
-                .sop_i                     ( sop_max_pool[0]       ),
-                .eop_i                     ( eop_max_pool[0]       ),
-                .sof_i                     ( sof_max_pool[0]       ),
-                .eof_i                     ( eof_max_pool[0]       ),
+                .data_i                    ( data_max_pool          ),
+                .sop_i                     ( sop_max_pool[0]        ),
+                .eop_i                     ( eop_max_pool[0]        ),
+                .sof_i                     ( sof_max_pool[0]        ),
+                .eof_i                     ( eof_max_pool[0]        ),
                 .data_o                    ( data_o                 ),
                 .data_valid_o              ( data_valid_o           ),
                 .sop_o                     ( sop_o                  ),
@@ -416,8 +416,17 @@ generate
                 .sof_o                     ( sof_o                  ),
                 .eof_o                     ( eof_o                  )
             );
-
         end
+    else
+        begin
+            assign data_o       = data_max_pool[0]      ;
+            assign data_valid_o = data_max_pool_valid[0];
+            assign sop_o        = sop_max_pool[0]       ;
+            assign eop_o        = eop_max_pool[0]       ;
+            assign sof_o        = sof_max_pool[0]       ;
+            assign eof_o        = eof_max_pool[0]       ;         
+        end       
+        
 endgenerate        
         
         /*

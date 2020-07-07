@@ -1,6 +1,6 @@
 //Author: ShVlad / e-mail: shvladspb@gmail.com
 `timescale 1 ns / 1 ns
-module conv_vect_ser
+module vect_matrix_mult
 #(
     parameter NUMBER_SPLITTED_CHANNELS  = 1,
     parameter THIS_CHANNEL_NUMBER       = 1,
@@ -65,12 +65,65 @@ reg  signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   summ;
 reg  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]            fifo_out;
 logic  signed[KERNEL_WIDTH+DATA_WIDTH-1:0]          fifo_in;
 
+logic                                   inputfifo_empty;
+logic     [$clog2(CHANNEL_NUM)-1: 0]       hold_cnt;
+logic signed [DATA_WIDTH-1:0]           data;
+logic                                   valid;
+//
+// inserting data hold time for next module    
+
+scfifo
+#(
+    .add_ram_output_register    ( "ON"              ),
+    .intended_device_family     ( "Cyclone V"       ),
+	.lpm_widthu					( $clog2(MTRX_NUM+1)),
+    .lpm_numwords               ( MTRX_NUM+1        ),
+    .lpm_width                  ( DATA_WIDTH        )
+)
+input_fifo
+(
+    .clock          ( clk                 ),
+    .data           ( data_i              ),
+    .rdreq          ( (hold_cnt==1)       ),
+    .wrreq          ( valid_i             ),
+	.empty          ( inputfifo_empty     ),
+	.full           (                     ),
+    .q              ( data                ),
+	.usedw          (                     ),
+	.aclr           (                     ),
+	.almost_empty   (                     ),
+	.almost_full    (                     ),
+	.eccstatus      (                     ),
+	.sclr           ( !reset_n            )
+);
+
+always_ff @( posedge clk or negedge reset_n )
+    if ( !reset_n )
+        hold_cnt <= '0;
+    else
+        if ( ( hold_cnt == CHANNEL_NUM ) && inputfifo_empty )
+            hold_cnt <= '0;
+        else if ( hold_cnt == CHANNEL_NUM )
+            hold_cnt <= 1;                
+        else if ( hold_cnt != 0 )
+            hold_cnt <= hold_cnt + 1'h1;
+        else if ( !inputfifo_empty )    
+            hold_cnt <= 1; 
+            
+always_ff @( posedge clk or reset_n )
+    if ( !reset_n )
+        valid <= 1'h0;
+    else
+        valid <= (hold_cnt!=0);
+//
+
+
 always @( posedge clk )
-    sh_valid_i <= {sh_valid_i[1:0],valid_i};
+    sh_valid_i <= {sh_valid_i[1:0],valid};
 
 always @( posedge clk )
     begin
-        sh_data[0] <= data_i;
+        sh_data[0] <= data;
         sh_data[1] <= sh_data[0];
         //sh_rom_addr[2:0] <= {sh_rom_addr[1:0],rom_addr};
         sh_rom_addr[0] <= rom_addr;
@@ -89,7 +142,7 @@ always @( posedge clk or negedge reset_n )
     else
         if ( rom_addr == (CHANNEL_NUM*MTRX_NUM)-1 )
             rom_addr <= '0;
-        else if ( valid_i )
+        else if ( valid )
             rom_addr <= rom_addr + 1'h1;
 //            
 always @( posedge clk or negedge reset_n )
@@ -115,7 +168,7 @@ always @( posedge clk or negedge reset_n )
     else
         if ( /*( rom_addr == CHANNEL_NUM-1 ) &&*/ (mtrx_cnt == MTRX_NUM-1) && sh_ram_addr[1]==CHANNEL_NUM-1 )
             mtrx_cnt <= '0;
-        else if ( /*valid_i*/sh_valid_i[2] && (sh_ram_addr[1] == CHANNEL_NUM-1) )
+        else if ( sh_valid_i[2] && (sh_ram_addr[1] == CHANNEL_NUM-1) )
             mtrx_cnt <= mtrx_cnt + 1'h1;
 
 always @( posedge clk )
@@ -151,6 +204,7 @@ always @( posedge clk )
 //            accum[sh_rom_addr[2]] <= accum_it + mult_it[0];
             
 // RAM test   
+
 reg   signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]           test_ram_in; 
 wire  signed [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]          ram_out; 
 reg   signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]           sh_ram_out; 
@@ -177,78 +231,7 @@ RAM_inst
     .clk            ( clk               ),
     .q              ( ram_out           )
 );           
-            
-            
-////test fifo
-//assign fifo_in = fifo_acc_rd[1] ? summ : mult_it[1];
-////always @( posedge clk )
-////    fifo_in <= fifo_acc_rd[2] ? summ : mult_it[1];
-//    
-//always @( posedge clk )
-//    summ <= fifo_out + mult_it[0];
-//
-//always @( posedge clk or negedge reset_n )
-//    if ( !reset_n )
-//        fifo_acc_wr <= '0;
-//    else
-//        fifo_acc_wr <= {fifo_acc_wr[2:0],sh_valid_i & ( mtrx_cnt < MTRX_NUM-1 )};
-//        
-//always @( posedge clk or negedge reset_n )
-//    if ( !reset_n )
-//        fifo_acc_rd <= '0;
-//    else
-//        fifo_acc_rd <= {fifo_acc_rd[1:0],( mtrx_cnt > 0 )};        
-//scfifo
-//#(
-//    .add_ram_output_register    ( "ON"                         ),
-//    .intended_device_family     ( "Cyclone V"                  ),
-//    .lpm_widthu                    ( 6                            ),
-//    .lpm_numwords               ( 64                           ),
-//    .lpm_width                  ( KERNEL_WIDTH+DATA_WIDTH      )
-//)
-//scfifo_inst
-//(
-//    .clock          ( clk                ),
-//    .data           ( fifo_in            ),
-//    .rdreq          ( /*fifo_acc_rd[0]*/( mtrx_cnt > 0 )|fifo_acc_rd[0]     ),
-//    .wrreq          ( fifo_acc_wr[2]  ),
-//    .empty          (  ),
-//    .full           (  ),
-//    .q              ( fifo_out       ),
-//    .usedw          (  ),
-//    .aclr           (  ),
-//    .almost_empty   (  ),
-//    .almost_full    (  ),
-//    .eccstatus      (  ),
-//    .sclr           (  )
-//); 
-//
-//always @( posedge clk or negedge reset_n )
-//    if ( !reset_n )
-//        for ( int i = 0; i < CHANNEL_NUM; i++)
-//            accum[i] <= '0;
-//    else
-//        if ( mtrx_cnt == 0 )
-//            accum[sh_rom_addr[1]] <= mult;
-//        else
-//            accum[sh_rom_addr[1]] <= accum[sh_rom_addr[1]] + mult;
-
-/*
-always @( posedge clk )
-    hold_data_start <= {hold_data_start[0],eop_i};    
-*/    
-/*
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        hold_data_cnt <= '0;
-    else
-        if ( !fifo_rd && hold_data_cnt == HOLD_DATA )
-            hold_data_cnt <= 0;  
-        else if ( fifo_rd || (hold_data_cnt == HOLD_DATA && !fifo_empty) )
-            hold_data_cnt <= 1'h1;            
-        else if ( hold_data_cnt != 0 )
-            hold_data_cnt <= hold_data_cnt + 1'h1;     
-*/       
+           
 
         
 ROM 
@@ -269,43 +252,7 @@ ROM_init
     .q                      ( kernel                    )
 );
          
-/*
-always @( posedge clk )
-    sh_fifo_empty <= fifo_empty;
-    
-assign n_fifo_empty = ~fifo_empty & sh_fifo_empty;
-assign fifo_rd = n_fifo_empty || (!fifo_empty && hold_data_cnt==HOLD_DATA);    
-scfifo
-#(
-    .add_ram_output_register    ( "ON"                                  ),
-    .intended_device_family     ( "Cyclone V"                           ),
-    .lpm_widthu                    ( 6                                     ),
-    .lpm_numwords               ( 64                                    ),
-    .lpm_width                  ( KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM      )
-)
-scfifo_inst
-(
-    .clock          ( clk                       ),
-    .data           ( accum[sh_rom_addr[2]]     ),
-    .rdreq          ( fifo_rd   ),
-    .wrreq          ( fifo_wr[2]                ),
-    .empty          ( fifo_empty                ),
-    .full           (),
-    .q              ( data_o                    ),
-    .usedw          (),
-    .aclr           (),
-    .almost_empty   (),
-    .almost_full    (),
-    .eccstatus      (),
-    .sclr           ()
-); 
-    
-always @( posedge clk or negedge reset_n ) 
-    if ( !reset_n )
-        data_valid_o <= 0;
-    else
-        data_valid_o <= fifo_rd;
-        */
+
 
 always @( posedge clk or negedge reset_n )
     if ( !reset_n )
@@ -324,39 +271,7 @@ always @( posedge clk or negedge reset_n )
             out_cnt <= '0;
         else if ( fifo_wr[0] && !fifo_wr[1] )
             out_cnt <= out_cnt + 1'h1;
-/* 
-always @( posedge clk )
-    data_o <= accum[sh_rom_addr[2]];
-    
-always @( posedge clk or negedge reset_n ) 
-    if ( !reset_n )
-        data_valid_o <= 0;
-    else
-        data_valid_o <= fifo_wr[0];
 
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        sop_o <= 1'h0;
-    else
-        if ( ( out_cnt == 0 ) && ( fifo_wr[0] && !fifo_wr[1] ) )
-            sop_o <= 1'h1;
-        else
-            sop_o <= 1'h0;
-
-always @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        eop_o <= 1'h0;
-    else
-        if ( ( out_cnt == STRING_LEN ) && ( fifo_wr[0] && !(mtrx_cnt == MTRX_NUM-1 ) ) )
-            eop_o <= 1'h1;
-        else
-            eop_o <= 1'h0;
-*/
-
-//
-//reg [KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]  data_o_test;
-//always @( posedge clk )
-//    data_o_test <= ram_in;
 
 reg [1:0]data_valid_it;
 reg [1:0]sop_it;
@@ -364,32 +279,32 @@ reg [1:0]eop_it;
 
 reg [$clog2(BIAS_NUM)-1:0]  bias_addr;
 
-always_ff @( posedge clk or negedge reset_n )
-    if ( !reset_n )
-        bias_addr <= '0;
-    else
-        if ( bias_addr == BIAS_NUM-1)
-            bias_addr <= 0;
-        else if (/*data_valid_it[0]*/fifo_wr[0])
-            bias_addr <= bias_addr + 1'h1;
-
-wire signed [BIAS_WIDTH-1:0] bias;            
-ROM 
-#(
-   .TYPE                    ( "CVS_BIAS"                ),
-   .NUMBER_SPLITTED_CHANNELS(NUMBER_SPLITTED_CHANNELS   ),
-   .THIS_CHANNEL_NUMBER     ( THIS_CHANNEL_NUMBER       ),
-   .DATA_WIDTH              ( BIAS_WIDTH      ),
-   .MEM_DEPTH               ( BIAS_NUM        ),
-   .RAM_STYLE               ( "M10K"          ),
-   .INI_FILE                ( BIAS_INI_FILE   )
-)
-ROM_bias_init
-(
-    .clk                    ( clk             ), 
-    .addr                   ( bias_addr       ),
-    .q                      ( bias                )
-);
+//always_ff @( posedge clk or negedge reset_n )
+//    if ( !reset_n )
+//        bias_addr <= '0;
+//    else
+//        if ( bias_addr == BIAS_NUM-1)
+//            bias_addr <= 0;
+//        else if (/*data_valid_it[0]*/fifo_wr[0])
+//            bias_addr <= bias_addr + 1'h1;
+//
+//wire signed [BIAS_WIDTH-1:0] bias;            
+//ROM 
+//#(
+//   .TYPE                    ( "CVS_BIAS"                ),
+//   .NUMBER_SPLITTED_CHANNELS(NUMBER_SPLITTED_CHANNELS   ),
+//   .THIS_CHANNEL_NUMBER     ( THIS_CHANNEL_NUMBER       ),
+//   .DATA_WIDTH              ( BIAS_WIDTH      ),
+//   .MEM_DEPTH               ( BIAS_NUM        ),
+//   .RAM_STYLE               ( "M10K"          ),
+//   .INI_FILE                ( BIAS_INI_FILE   )
+//)
+//ROM_bias_init
+//(
+//    .clk                    ( clk             ), 
+//    .addr                   ( bias_addr       ),
+//    .q                      ( bias                )
+//);
 
 logic signed[KERNEL_WIDTH+DATA_WIDTH+MTRX_NUM-1:0]   data_pipe;
 /*
@@ -399,7 +314,7 @@ always @( posedge clk )
 */  
 always @( posedge clk )
     begin
-        data_pipe <= test_ram_in + bias;
+        data_pipe <= test_ram_in/* + bias*/;
         data_o <= data_pipe;
     end
 always @( posedge clk or negedge reset_n ) 
